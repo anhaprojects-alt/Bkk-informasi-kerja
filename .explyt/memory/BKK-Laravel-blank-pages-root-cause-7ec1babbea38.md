@@ -3,6 +3,7 @@ name: "BKK-Laravel-blank-pages-root-cause"
 description: "BKK Laravel13 Vercel blank pages: placeholder DB creds, APP_DEBUG=false, SESSION_DRIVER=database; diagnose db:show"
 type: project
 lastUpdated: 2026-09-18T20:47
+lastRecall: 2026-09-18T21:01
 ---
 
 Root cause of "pages don't display" in this BKK job-listing app.

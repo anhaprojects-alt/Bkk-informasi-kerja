@@ -3,6 +3,7 @@ name: "Supabase-DB-setup-pending-password"
 description: "Supabase setup: project hfzsykrwfwjgoqxzwkmp, pooler host; sb_publishable/sb_secret keys not DB password; unfilled"
 type: project
 lastUpdated: 2026-09-18T20:47
+lastRecall: 2026-09-18T21:01
 ---
 
 Ongoing Supabase DB setup (state as of 2026-09-18), NOT yet connected — the Postgres password is still unfilled.
