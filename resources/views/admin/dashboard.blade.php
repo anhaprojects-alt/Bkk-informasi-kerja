@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>BKK - Dashboard Panel</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
@@ -38,7 +38,7 @@
             </div>
 
             <div class="p-4 border-t border-indigo-800">
-                <form method="POST" action="{{ route('logout') }}" x-data="{ busy: false }" @submit="busy = true">
+                <form method="POST" action="{{ route('logout') }}" x-data="{ busy: false }" x-on:submit="busy = true">
                     @csrf
                     <button type="submit" :disabled="busy" :class="busy && 'opacity-60 cursor-not-allowed'"
                         class="w-full flex items-center space-x-3 px-4 py-3 text-indigo-200 hover:bg-red-600 hover:text-white rounded-xl transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white">
@@ -61,7 +61,7 @@
                         {{ Auth::user()->name }} ({{ ucfirst(Auth::user()->role) }})
                     </span>
                     {{-- The sidebar is hidden below md, so mobile needs its own logout affordance. --}}
-                    <form method="POST" action="{{ route('logout') }}" class="md:hidden" x-data="{ busy: false }" @submit="busy = true">
+                    <form method="POST" action="{{ route('logout') }}" class="md:hidden" x-data="{ busy: false }" x-on:submit="busy = true">
                         @csrf
                         <button type="submit" :disabled="busy" :class="busy && 'opacity-60 cursor-not-allowed'" aria-label="Keluar akun"
                             class="inline-flex items-center justify-center p-2 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500">

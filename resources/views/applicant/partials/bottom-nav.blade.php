@@ -20,7 +20,7 @@
             </svg>
             <span class="text-[11px] font-semibold">Lamaran</span>
         </a>
-        <form method="POST" action="{{ route('logout') }}" class="flex" x-data="{ busy: false }" @submit="busy = true">
+        <form method="POST" action="{{ route('logout') }}" class="flex" x-data="{ busy: false }" x-on:submit="busy = true">
             @csrf
             <button type="submit" :disabled="busy" :class="busy && 'opacity-60 cursor-not-allowed'"
                 class="flex flex-col items-center gap-0.5 py-1.5 px-4 rounded-xl min-w-[64px] text-slate-400 hover:text-red-600 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500">

@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="description" content="BKK - Bursa Kerja Khusus. Akses informasi lowongan kerja terpercaya untuk alumni dan pencari kerja.">
     <meta name="theme-color" content="#4f46e5">
     <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">

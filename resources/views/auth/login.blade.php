@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="description" content="Masuk ke akun BKK untuk mengakses informasi lowongan kerja terbaru bagi alumni dan pencari kerja.">
     <meta name="theme-color" content="#4f46e5">
     <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
