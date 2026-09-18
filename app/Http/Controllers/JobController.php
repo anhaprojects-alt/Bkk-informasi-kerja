@@ -27,7 +27,8 @@ class JobController extends Controller
                 });
             })
             ->latest()
-            ->get();
+            ->paginate(10)
+            ->withQueryString();
 
         $appliedJobIds = Applicant::where('user_id', Auth::id())->pluck('job_listing_id')->all();
 
@@ -56,8 +57,13 @@ class JobController extends Controller
         abort_if($jobListing->status !== 'open', 403, 'Lowongan ini sudah ditutup.');
 
         $data = $request->validate([
-            'resume' => ['required', 'string', 'max:2048'],
+            'resume' => ['required', 'url:http,https', 'max:2048'],
             'cover_letter' => ['nullable', 'string', 'max:5000'],
+        ], [
+            'resume.required' => 'Link CV/resume wajib diisi.',
+            'resume.url' => 'Link CV/resume harus berupa tautan yang valid dan diawali http:// atau https://.',
+            'resume.max' => 'Link CV/resume terlalu panjang (maksimal 2048 karakter).',
+            'cover_letter.max' => 'Surat lamaran terlalu panjang (maksimal 5000 karakter).',
         ]);
 
         $alreadyApplied = Applicant::where('user_id', Auth::id())

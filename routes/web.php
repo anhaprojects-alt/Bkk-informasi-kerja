@@ -5,9 +5,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\JobController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return redirect()->route('introduction');
-});
+Route::redirect('/', '/intro')->name('home');
 
 Route::get('/intro', [AuthController::class, 'introduction'])->name('introduction');
 Route::get('/login', [AuthController::class, 'login'])->name('login');
