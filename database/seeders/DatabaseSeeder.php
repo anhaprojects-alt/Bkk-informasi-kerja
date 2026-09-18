@@ -110,8 +110,8 @@ class DatabaseSeeder extends Seeder
         // Rich sample applications so the smart metrics dashboard renders beautifully.
         $openJobs = JobListing::where('status', 'open')->get();
 
-        if ($openJobs->count() >= 2) {
-            // Budi's application history funnel
+        if ($openJobs->count() >= 3) {
+            // Budi's application history funnel (accepted, pending, rejected)
             Applicant::updateOrCreate(
                 ['user_id' => $applicantOne->id, 'job_listing_id' => $openJobs[0]->id],
                 [
@@ -127,6 +127,15 @@ class DatabaseSeeder extends Seeder
                     'resume' => 'https://drive.google.com/drive/folders/sample-budi-cv',
                     'cover_letter' => 'Besar harapan saya untuk dapat berdiskusi mengenai kualifikasi saya sebagai QA engineer.',
                     'status' => 'pending',
+                ]
+            );
+
+            Applicant::updateOrCreate(
+                ['user_id' => $applicantOne->id, 'job_listing_id' => $openJobs[2]->id],
+                [
+                    'resume' => 'https://drive.google.com/drive/folders/sample-budi-cv',
+                    'cover_letter' => 'Lamaran dikirim namun belum mendapat respons.',
+                    'status' => 'rejected',
                 ]
             );
         }
