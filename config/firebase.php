@@ -11,7 +11,8 @@ return [
     |
     */
 
-    'project_id' => env('FIREBASE_PROJECT_ID', ''),
+    'project_id' => env('FIREBASE_PROJECT_ID', 'data01-c6d26'),
+    'server_key' => env('FIREBASE_SERVER_KEY', ''),
     'api_key' => env('FIREBASE_API_KEY', ''),
     'auth_domain' => env('FIREBASE_AUTH_DOMAIN', ''),
     'storage_bucket' => env('FIREBASE_STORAGE_BUCKET', ''),
