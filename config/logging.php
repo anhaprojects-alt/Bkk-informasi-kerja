@@ -40,7 +40,6 @@ return [
             'with' => [
                 'stream' => 'php://stderr',
             ],
-            'processors' => [App\Logging\LogProcessor::class],
         ],
     ],
 

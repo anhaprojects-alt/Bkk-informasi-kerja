@@ -10,18 +10,6 @@ putenv('CACHE_STORE=array');
 putenv('DB_CONNECTION=sqlite');
 putenv('DB_DATABASE=:memory:');
 
-$_ENV['LOG_CHANNEL'] = 'stderr';
-$_ENV['SESSION_DRIVER'] = 'cookie';
-$_ENV['CACHE_STORE'] = 'array';
-$_ENV['DB_CONNECTION'] = 'sqlite';
-$_ENV['DB_DATABASE'] = ':memory:';
-
-$_SERVER['LOG_CHANNEL'] = 'stderr';
-$_SERVER['SESSION_DRIVER'] = 'cookie';
-$_SERVER['CACHE_STORE'] = 'array';
-$_SERVER['DB_CONNECTION'] = 'sqlite';
-$_SERVER['DB_DATABASE'] = ':memory:';
-
 // 3. Inisialisasi Aplikasi Laravel Core Bootstrap
 $app = require __DIR__ . '/../bootstrap/app.php';
 
@@ -30,5 +18,7 @@ $kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
 
 $request = Illuminate\Http\Request::capture();
 $response = $kernel->handle($request);
+
+// 5. Pastikan konten output dikirim ke browser secara eksplisit tanpa cache buffer kosong
 $response->send();
 $kernel->terminate($request, $response);
