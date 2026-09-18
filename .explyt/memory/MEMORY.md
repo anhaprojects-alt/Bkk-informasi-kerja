@@ -1,3 +1,3 @@
-- [BKK-Laravel-blank-pages-root-cause](BKK-Laravel-blank-pages-root-cause-7ec1babbea38.md) — BKK Laravel13 Vercel blank pages: placeholder DB creds, APP_DEBUG=false, SESSION_DRIVER=database; diagnose db:show
 - [User-background-jobboard-developer](User-background-jobboard-developer-f9eafefda8b4.md) — BKK job-board dev, Indonesian speaker; confuses Supabase API keys vs Postgres DB password; needs plain-language help
-- [Supabase-DB-setup-pending-password](Supabase-DB-setup-pending-password-18b8eef5041a.md) — Supabase setup: project hfzsykrwfwjgoqxzwkmp, pooler host; sb_publishable/sb_secret keys not DB password; unfilled
+- [BKK-blank-pages-and-build-blockers](BKK-blank-pages-and-build-blockers-f7a931df124b.md) — BKK app blank pages: empty DB_* env with database session/cache driver; Vite build broke on missing bootstrap.js
+- [BKK-stack-railway-firebase-no-supabase](BKK-stack-railway-firebase-no-supabase-4fca382db696.md) — BKK stack decision: Railway (hosting + Postgres) + Firebase only; Supabase config, disk and npm deps removed
