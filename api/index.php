@@ -1,4 +1,5 @@
 <?php
 
-// Mengembalikan fungsi jembatan api lokal ke file index publik utama Laravel standar
+// Jembatan Utama Laravel untuk Northflank & Vercel
+// Selalu mengarah ke index publik utama agar Laravel menangani routing & database
 require __DIR__ . '/../public/index.php';
