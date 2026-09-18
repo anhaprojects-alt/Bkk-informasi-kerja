@@ -4,13 +4,20 @@
 require __DIR__ . '/../vendor/autoload.php';
 
 // 2. Set environment variables secara mutlak untuk runtime Vercel serverless
+// Menggunakan PostgreSQL Supabase Cloud jika variabel lingkungan tersedia, jika tidak gunakan in-memory fallback
 putenv('LOG_CHANNEL=stderr');
 putenv('SESSION_DRIVER=cookie');
 putenv('CACHE_STORE=array');
-putenv('DB_CONNECTION=sqlite');
-putenv('DB_DATABASE=:memory:');
 
-// 3. Muat aplikasi Laravel menggunakan handler index native agar inisialisasi IoC Service Container lengkap
+if (env('DB_HOST')) {
+    putenv('DB_CONNECTION=pgsql');
+    putenv('DB_PORT=5432');
+} else {
+    putenv('DB_CONNECTION=sqlite');
+    putenv('DB_DATABASE=:memory:');
+}
+
+// 3. Muat aplikasi Laravel menggunakan handler index native
 $app = require __DIR__ . '/../bootstrap/app.php';
 
 // 4. Jalankan siklus Http Kernel standar untuk mendaftarkan semua dependensi dasar secara otomatis
