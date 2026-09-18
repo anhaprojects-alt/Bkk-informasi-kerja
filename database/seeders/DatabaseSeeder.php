@@ -107,14 +107,25 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        // A sample application so the dashboard has data.
-        $firstJob = JobListing::where('status', 'open')->first();
-        if ($firstJob) {
+        // Rich sample applications so the smart metrics dashboard renders beautifully.
+        $openJobs = JobListing::where('status', 'open')->get();
+
+        if ($openJobs->count() >= 2) {
+            // Budi's application history funnel
             Applicant::updateOrCreate(
-                ['user_id' => $applicantOne->id, 'job_listing_id' => $firstJob->id],
+                ['user_id' => $applicantOne->id, 'job_listing_id' => $openJobs[0]->id],
                 [
-                    'resume' => 'https://example.test/cv/budi-santoso.pdf',
-                    'cover_letter' => 'Saya tertarik dan yakin dapat berkontribusi pada posisi ini.',
+                    'resume' => 'https://drive.google.com/drive/folders/sample-budi-cv',
+                    'cover_letter' => 'Saya tertarik dan yakin dapat berkontribusi maksimal pada posisi backend developer ini.',
+                    'status' => 'accepted',
+                ]
+            );
+
+            Applicant::updateOrCreate(
+                ['user_id' => $applicantOne->id, 'job_listing_id' => $openJobs[1]->id],
+                [
+                    'resume' => 'https://drive.google.com/drive/folders/sample-budi-cv',
+                    'cover_letter' => 'Besar harapan saya untuk dapat berdiskusi mengenai kualifikasi saya sebagai QA engineer.',
                     'status' => 'pending',
                 ]
             );
