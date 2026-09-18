@@ -10,18 +10,15 @@ putenv('CACHE_STORE=array');
 putenv('DB_CONNECTION=sqlite');
 putenv('DB_DATABASE=:memory:');
 
-// 3. Muat instansiasi core bootstrap Laravel Application
-$app = require_once __DIR__ . '/../bootstrap/app.php';
+// 3. Muat aplikasi Laravel menggunakan handler index native agar inisialisasi IoC Service Container lengkap
+$app = require __DIR__ . '/../bootstrap/app.php';
 
-// 4. Hubungkan instansiasi Kernel secara eksplisit untuk mendaftarkan Core Services (View, Session, Router)
-$app->boot();
-
-// 5. Tangani Request Menggunakan Http Kernel Native standar Laravel
+// 4. Jalankan siklus Http Kernel standar untuk mendaftarkan semua dependensi dasar secara otomatis
 $kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
 
 $request = Illuminate\Http\Request::capture();
 $response = $kernel->handle($request);
 
-// 6. Kirim konten output HTML resmi ke layar browser Anda
+// 5. Kirim konten halaman HTML resmi ke browser Anda
 $response->send();
 $kernel->terminate($request, $response);
