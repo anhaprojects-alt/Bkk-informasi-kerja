@@ -22,6 +22,12 @@
             </div>
         </div>
 
+        @if (session('status'))
+            <div class="mt-4 p-3 bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs rounded-xl">
+                {{ session('status') }}
+            </div>
+        @endif
+
         <!-- Selection & Tabs -->
         <div class="my-auto space-y-6" x-data="{ tab: 'email' }">
             <div class="flex p-1 bg-slate-100 rounded-xl">
