@@ -3,7 +3,7 @@ name: "BKK-blank-pages-and-build-blockers"
 description: "BKK app blank pages: empty DB_* env with database session/cache driver; Vite build broke on missing bootstrap.js"
 type: project
 lastUpdated: 2026-09-18T23:58
-lastRecall: 2026-09-18T23:48
+lastRecall: 2026-09-19T00:05
 ---
 
 Two recurring blockers that make this BKK job-listing app fail to render. Neither is a Blade/Eloquent bug.

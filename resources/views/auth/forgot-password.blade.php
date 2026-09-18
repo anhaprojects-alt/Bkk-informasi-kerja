@@ -85,9 +85,6 @@
 
     </div>
 
-    <!-- Include AlpineJS for tabs toggle -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-
     <script>
         function sendOTP() {
             alert('Firebase Phone Auth SDK Triggered. Kode OTP sedang dikirim ke nomor tersebut!');
