@@ -1,3 +1,4 @@
 - [User-background-jobboard-developer](User-background-jobboard-developer-f9eafefda8b4.md) — BKK job-board dev, Indonesian speaker; confuses Supabase API keys vs Postgres DB password; needs plain-language help
 - [BKK-blank-pages-and-build-blockers](BKK-blank-pages-and-build-blockers-f7a931df124b.md) — BKK app blank pages: empty DB_* env with database session/cache driver; Vite build broke on missing bootstrap.js
 - [BKK-stack-railway-firebase-no-supabase](BKK-stack-railway-firebase-no-supabase-4fca382db696.md) — BKK stack decision: Railway (hosting + Postgres) + Firebase only; Supabase config, disk and npm deps removed
+- [BKK-Railway-https-mixed-content-trustproxies](BKK-Railway-https-mixed-content-trustproxies-70b4e1ce2251.md) — Unstyled BKK pages on Railway: missing trustProxies made Laravel emit http:// asset URLs blocked as mixed content
