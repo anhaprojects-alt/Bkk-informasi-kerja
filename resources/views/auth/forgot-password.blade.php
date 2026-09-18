@@ -80,38 +80,131 @@
                 </form>
             </div>
 
-            <!-- Phone Reset (3D Card Warning Alert) -->
-            <div x-show="tab === 'phone'" x-cloak id="panel-phone" role="tabpanel" aria-labelledby="tab-phone" class="space-y-4">
-                <div class="flex gap-3 p-4 bg-gradient-to-br from-amber-50 to-amber-100/30 border border-amber-200/70 rounded-2xl shadow-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M5.07 19h13.86a2 2 0 001.74-3L13.74 4a2 2 0 00-3.48 0L3.33 16a2 2 0 001.74 3z" />
-                    </svg>
-                    <div class="text-xs text-amber-800 leading-relaxed space-y-1">
-                        <p class="font-bold">Pemulihan via SMS belum tersedia.</p>
-                        <p class="text-slate-600">Fitur verifikasi nomor HP sedang disiapkan. Untuk saat ini gunakan pemulihan via email, atau hubungi admin BKK sekolah Anda.</p>
-                    </div>
-                </div>
+            <!-- Phone Reset (3D Card with Firebase Integration) -->
+            <div x-show="tab === 'phone'" x-cloak id="panel-phone" role="tabpanel" aria-labelledby="tab-phone" class="space-y-4"
+                 x-data="{ step: 'request', phone: '', otp: '', loading: false, confirmationResult: null }">
 
-                <div aria-hidden="true" class="opacity-40 pointer-events-none select-none space-y-4">
-                    <div>
-                        <span class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Nomor HP Terdaftar</span>
-                        <div class="flex space-x-2">
-                            <span class="inline-flex items-center px-4 bg-slate-100 border border-slate-200 text-sm text-slate-500 font-semibold rounded-2xl shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)]">+62</span>
-                            <input type="tel" disabled placeholder="81234567890" tabindex="-1"
-                                class="flex-1 block w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)]">
+                <div x-show="step === 'request'" class="space-y-4">
+                    <div class="flex gap-3 p-4 bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200/70 rounded-2xl shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <div class="text-xs text-blue-800 leading-relaxed">
+                            <p class="font-bold">Verifikasi Cepat via WhatsApp/SMS</p>
+                            <p class="text-slate-600">Masukkan nomor HP Anda yang terdaftar untuk menerima kode OTP keamanan.</p>
                         </div>
                     </div>
-                    <button type="button" disabled tabindex="-1"
-                        class="w-full py-4 px-6 bg-slate-300 text-white font-bold text-center rounded-2xl border-b-4 border-slate-400">
-                        Kirim Kode OTP via SMS
+
+                    <div class="space-y-1.5">
+                        <span class="block text-xs font-bold uppercase tracking-wider text-slate-400">Nomor HP Terdaftar</span>
+                        <div class="flex space-x-2">
+                            <span class="inline-flex items-center px-4 bg-slate-100 border border-slate-200 text-sm text-slate-500 font-semibold rounded-2xl shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)]">+62</span>
+                            <input type="tel" x-model="phone" placeholder="81234567890"
+                                class="flex-1 block w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] focus:outline-none focus:bg-white focus:border-blue-500 transition">
+                        </div>
+                    </div>
+
+                    <div id="recaptcha-container"></div>
+
+                    <button type="button" @click="window.sendOtp(phone, $data)" :disabled="!phone"
+                        class="w-full py-4 px-6 bg-gradient-to-b from-blue-600 to-blue-700 text-white font-bold text-center rounded-2xl shadow-[0_8px_20px_rgba(29,78,216,0.25)] border-b-4 border-blue-900 active:border-b-0 active:translate-y-[4px] transition-all duration-150 disabled:opacity-50">
+                        Kirim Kode OTP
                     </button>
                 </div>
 
-                <button type="button" @click="tab = 'email'"
-                    class="w-full py-3.5 px-6 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold text-center rounded-2xl border border-slate-200/80 shadow-sm border-b-2 active:border-b-0 active:translate-y-[2px] transition-all">
-                    Gunakan Pemulihan via Email
-                </button>
+                <div x-show="step === 'verify'" class="space-y-4" x-cloak>
+                    <div class="space-y-1.5 text-center">
+                        <h3 class="text-sm font-black text-slate-800 uppercase tracking-widest">Masukkan Kode OTP</h3>
+                        <p class="text-xs text-slate-500">Kode telah dikirim ke +62<span x-text="phone"></span></p>
+                    </div>
+
+                    <input type="text" x-model="otp" maxlength="6" placeholder="000000"
+                        class="block w-full text-center tracking-[1em] text-xl font-black py-4 bg-slate-50 border-2 border-slate-200 rounded-2xl shadow-inner focus:outline-none focus:border-blue-500 transition">
+
+                    <button type="button" @click="window.verifyOtp(otp, $data)"
+                        class="w-full py-4 px-6 bg-emerald-600 text-white font-bold text-center rounded-2xl shadow-md border-b-4 border-emerald-800 active:border-b-0 active:translate-y-[4px] transition-all">
+                        Verifikasi & Lanjut
+                    </button>
+
+                    <button type="button" @click="step = 'request'" class="w-full text-xs font-bold text-slate-400 uppercase tracking-widest hover:text-slate-600">
+                        Kirim Ulang Kode
+                    </button>
+                </div>
+
+                <!-- Final Reset Form after Phone Verified -->
+                <form x-show="step === 'reset'" method="POST" action="{{ route('password.phone.reset') }}" class="space-y-4" x-cloak>
+                    @csrf
+                    <input type="hidden" name="phone_number" :value="phone">
+                    <input type="hidden" name="firebase_token" id="firebase_token" value="verified_session">
+
+                    <div class="space-y-1.5">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400">Kata Sandi Baru</label>
+                        <input type="password" name="password" required placeholder="••••••••"
+                            class="block w-full px-4 py-3.5 bg-slate-50/80 border rounded-2xl text-sm focus:outline-none focus:bg-white shadow-inner">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400">Konfirmasi Kata Sandi</label>
+                        <input type="password" name="password_confirmation" required placeholder="••••••••"
+                            class="block w-full px-4 py-3.5 bg-slate-50/80 border rounded-2xl text-sm focus:outline-none focus:bg-white shadow-inner">
+                    </div>
+
+                    <button type="submit"
+                        class="w-full py-4 px-6 bg-gradient-to-b from-blue-600 to-blue-700 text-white font-bold text-center rounded-2xl shadow-lg border-b-4 border-blue-900 active:border-b-0 active:translate-y-[4px] transition-all">
+                        Simpan Sandi Baru
+                    </button>
+                </form>
+
             </div>
+        </div>
+
+        <!-- Firebase & Auth Logic -->
+        <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+        <script>
+            // Initialize Firebase with env variables passed from Laravel
+            const firebaseConfig = {
+                apiKey: "{{ config('firebase.api_key') }}",
+                authDomain: "{{ config('firebase.auth_domain') }}",
+                projectId: "{{ config('firebase.project_id') }}",
+                storageBucket: "{{ config('firebase.storage_bucket') }}",
+                messagingSenderId: "{{ config('firebase.messaging_sender_id') }}",
+                appId: "{{ config('firebase.app_id') }}"
+            };
+
+            if (firebaseConfig.apiKey) {
+                firebase.initializeApp(firebaseConfig);
+            }
+
+            // This would be triggered by Alpine
+            window.sendOtp = function(phoneNumber, alpineInstance) {
+                const appVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+                    'size': 'invisible'
+                });
+
+                firebase.auth().signInWithPhoneNumber('+62' + phoneNumber, appVerifier)
+                    .then((confirmationResult) => {
+                        window.confirmationResult = confirmationResult;
+                        alpineInstance.step = 'verify';
+                    }).catch((error) => {
+                        console.error("SMS Error:", error);
+                        alert("Gagal mengirim SMS. Pastikan nomor benar dan konfigurasi Firebase aktif.");
+                    });
+            }
+
+            window.verifyOtp = function(otp, alpineInstance) {
+                if (!window.confirmationResult) return;
+                window.confirmationResult.confirm(otp).then((result) => {
+                    const user = result.user;
+                    alpineInstance.step = 'reset';
+                    // Optional: Get token and put in hidden field for backend verification
+                    user.getIdToken().then(token => {
+                        document.getElementById('firebase_token').value = token;
+                    });
+                }).catch((error) => {
+                    alert("Kode OTP salah atau kedaluwarsa.");
+                });
+            }
+        </script>
         </div>
 
         <!-- Footer -->

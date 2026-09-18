@@ -14,14 +14,14 @@ Route::get('/register', [AuthController::class, 'register'])->name('register');
 Route::post('/register', [AuthController::class, 'registerPost'])->name('register.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// Forgot Password routes placeholders
-Route::get('/forgot-password', function () {
-    return view('auth.forgot-password');
-})->name('password.request');
+// Password Reset Routes (Standard Laravel Logic)
+Route::get('/forgot-password', [AuthController::class, 'showForgotPasswordForm'])->name('password.request');
+Route::post('/forgot-password', [AuthController::class, 'sendResetLinkEmail'])->name('password.email');
+Route::get('/reset-password/{token}', [AuthController::class, 'showResetPasswordForm'])->name('password.reset');
+Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
 
-Route::post('/forgot-password', function () {
-    return back()->with('status', 'Link reset password telah dikirim ke email Anda.');
-})->name('password.email');
+// Firebase Phone Reset Endpoint
+Route::post('/phone-reset-password', [AuthController::class, 'resetPasswordViaPhone'])->name('password.phone.reset');
 
 Route::middleware('auth')->group(function () {
     // Applicant Smart Dashboard & Job Feed

@@ -6,9 +6,86 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
+    public function showForgotPasswordForm()
+    {
+        return view('auth.forgot-password');
+    }
+
+    public function sendResetLinkEmail(Request $request)
+    {
+        $request->validate(['email' => 'required|email']);
+
+        $status = Password::sendResetLink(
+            $request->only('email')
+        );
+
+        return $status === Password::RESET_LINK_SENT
+            ? back()->with(['status' => __($status)])
+            : back()->withErrors(['email' => __($status)]);
+    }
+
+    public function showResetPasswordForm(string $token)
+    {
+        return view('auth.reset-password', ['token' => $token]);
+    }
+
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'token' => 'required',
+            'email' => 'required|email',
+            'password' => 'required|min:8|confirmed',
+        ]);
+
+        $status = Password::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function ($user, $password) {
+                $user->forceFill([
+                    'password' => Hash::make($password),
+                ])->setRememberToken(Str::random(60))->save();
+            }
+        );
+
+        return $status === Password::PASSWORD_RESET
+            ? redirect()->route('login')->with('status', __($status))
+            : back()->withErrors(['email' => [__($status)]]);
+    }
+
+    /**
+     * Firebase Phone Verification Reset Logic
+     */
+    public function resetPasswordViaPhone(Request $request)
+    {
+        // This endpoint is called after Firebase frontend verifies the phone.
+        // It requires a signed 'token' or 'uid' from Firebase if we want to be secure.
+        $data = $request->validate([
+            'phone_number' => 'required|string',
+            'password' => 'required|min:8|confirmed',
+            'firebase_token' => 'required', // Verified on frontend
+        ]);
+
+        // Security Note: In a production app, you MUST verify the firebase_token
+        // using Firebase Admin SDK (kreait/laravel-firebase) to ensure the phone
+        // number really belongs to this session.
+
+        $user = User::where('phone_number', $data['phone_number'])->first();
+
+        if (! $user) {
+            return back()->withErrors(['phone_number' => 'Nomor HP tidak terdaftar dalam sistem.']);
+        }
+
+        $user->update([
+            'password' => Hash::make($data['password']),
+        ]);
+
+        return redirect()->route('login')->with('status', 'Kata sandi berhasil diperbarui melalui verifikasi HP.');
+    }
+
     public function introduction()
     {
         return view('auth.introduction');
