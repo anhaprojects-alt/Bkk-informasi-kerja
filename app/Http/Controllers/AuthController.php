@@ -19,6 +19,7 @@ class AuthController extends Controller
         if (Auth::check()) {
             return $this->redirectBasedOnRole(Auth::user());
         }
+
         return view('auth.login');
     }
 
@@ -31,6 +32,7 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
+
             return $this->redirectBasedOnRole(Auth::user());
         }
 
@@ -65,7 +67,7 @@ class AuthController extends Controller
         // If it's a company, initialize a blank company profile
         if ($user->role === 'company') {
             $user->company()->create([
-                'name' => 'Perusahaan ' . $user->name,
+                'name' => 'Perusahaan '.$user->name,
                 'description' => 'Profil deskripsi perusahaan baru.',
             ]);
         }
@@ -80,6 +82,7 @@ class AuthController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+
         return redirect()->route('introduction');
     }
 
@@ -90,6 +93,7 @@ class AuthController extends Controller
         } elseif ($user->role === 'company') {
             return redirect()->intended('/admin/dashboard'); // Let's use the shared backend panel
         }
-        return redirect()->intended('/applicant/jobs');
+
+        return redirect()->intended('/applicant/dashboard');
     }
 }

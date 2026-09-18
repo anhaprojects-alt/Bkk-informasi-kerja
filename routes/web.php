@@ -24,7 +24,8 @@ Route::post('/forgot-password', function () {
 })->name('password.email');
 
 Route::middleware('auth')->group(function () {
-    // Applicant Job Feed
+    // Applicant Smart Dashboard & Job Feed
+    Route::get('/applicant/dashboard', [JobController::class, 'dashboard'])->name('applicant.dashboard');
     Route::get('/applicant/jobs', [JobController::class, 'index'])->name('jobs.index');
     Route::get('/applicant/jobs/{jobListing}', [JobController::class, 'show'])->name('jobs.show');
     Route::post('/applicant/jobs/{jobListing}/apply', [JobController::class, 'apply'])->name('jobs.apply');
