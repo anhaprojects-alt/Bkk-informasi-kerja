@@ -1,9 +1,5 @@
 {
     "version": 2,
-    "framework": "laravel",
-    "commands": {
-        "build": "npm run build"
-    },
     "builds": [
         {
             "src": "api/index.php",
