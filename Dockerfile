@@ -27,10 +27,12 @@ WORKDIR /var/www/html
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 COPY composer.json composer.lock ./
-RUN composer install --no-dev --no-interaction --no-progress --prefer-dist --optimize-autoloader
+RUN composer install --no-dev --no-interaction --no-progress --prefer-dist --optimize-autoloader --no-scripts
 
 COPY . .
 COPY --from=asset-builder /app/public/build ./public/build
+
+RUN composer run-script post-autoload-dump
 
 COPY docker/nginx.conf /etc/nginx/templates/nginx.conf.template
 COPY docker/entrypoint.sh /usr/local/bin/railway-entrypoint
