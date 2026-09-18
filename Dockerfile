@@ -1,4 +1,4 @@
-# Stage 1: Build Frontend Assets with Node
+# Stage 1: Build frontend assets
 FROM node:20-alpine AS asset-builder
 WORKDIR /app
 COPY package*.json ./
@@ -6,13 +6,13 @@ RUN npm ci
 COPY . .
 RUN npm run build
 
-# Stage 2: Production PHP Environment
+# Stage 2: Production PHP + Nginx runtime for Railway
 FROM php:8.3-fpm-alpine
 
-# Install system dependencies and PHP extensions
 RUN apk add --no-cache \
     nginx \
     supervisor \
+    gettext \
     curl \
     libpng-dev \
     libxml2-dev \
@@ -23,25 +23,29 @@ RUN apk add --no-cache \
 
 RUN docker-php-ext-install pdo pdo_mysql pdo_pgsql bcmath gd
 
-# Configure Nginx
-COPY docker/nginx.conf /etc/nginx/nginx.conf
-
-# Set working directory
 WORKDIR /var/www/html
 
-# Copy application files
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --no-interaction --no-progress --prefer-dist --optimize-autoloader
+
 COPY . .
 COPY --from=asset-builder /app/public/build ./public/build
 
-# Install Composer production dependencies
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-RUN composer install --no-dev --optimize-autoloader --no-interaction
+COPY docker/nginx.conf /etc/nginx/templates/nginx.conf.template
+COPY docker/entrypoint.sh /usr/local/bin/railway-entrypoint
+COPY docker/supervisord.conf /etc/supervisord.conf
+RUN chmod +x /usr/local/bin/railway-entrypoint \
+    && mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views bootstrap/cache \
+    && chown -R www-data:www-data storage bootstrap/cache \
+    && rm -f /etc/nginx/http.d/default.conf
 
-# Set directory permissions for Laravel
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+ENV APP_ENV=production \
+    APP_DEBUG=false \
+    LOG_CHANNEL=stderr \
+    PORT=8080
 
-# Expose port
-EXPOSE 80
+EXPOSE 8080
 
-# Start Supervisor to run both Nginx & PHP-FPM
-CMD ["/usr/bin/supervisord", "-c", "/var/www/html/docker/supervisord.conf"]
+ENTRYPOINT ["/usr/local/bin/railway-entrypoint"]
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
