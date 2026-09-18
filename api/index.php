@@ -10,15 +10,18 @@ putenv('CACHE_STORE=array');
 putenv('DB_CONNECTION=sqlite');
 putenv('DB_DATABASE=:memory:');
 
-// 3. Inisialisasi Aplikasi Laravel Core Bootstrap
-$app = require __DIR__ . '/../bootstrap/app.php';
+// 3. Muat instansiasi core bootstrap Laravel Application
+$app = require_once __DIR__ . '/../bootstrap/app.php';
 
-// 4. Tangani Request Secara Serverless menggunakan Http Kernel Native
+// 4. Hubungkan instansiasi Kernel secara eksplisit untuk mendaftarkan Core Services (View, Session, Router)
+$app->boot();
+
+// 5. Tangani Request Menggunakan Http Kernel Native standar Laravel
 $kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
 
 $request = Illuminate\Http\Request::capture();
 $response = $kernel->handle($request);
 
-// 5. Pastikan konten output dikirim ke browser secara eksplisit tanpa cache buffer kosong
+// 6. Kirim konten output HTML resmi ke layar browser Anda
 $response->send();
 $kernel->terminate($request, $response);
