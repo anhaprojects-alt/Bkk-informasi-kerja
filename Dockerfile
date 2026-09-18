@@ -16,11 +16,12 @@ RUN apk add --no-cache \
     curl \
     libpng-dev \
     libxml2-dev \
+    postgresql-dev \
     zip \
     unzip \
     git
 
-RUN docker-php-ext-install pdo pdo_mysql bcmath gd
+RUN docker-php-ext-install pdo pdo_mysql pdo_pgsql bcmath gd
 
 # Configure Nginx
 COPY docker/nginx.conf /etc/nginx/nginx.conf
