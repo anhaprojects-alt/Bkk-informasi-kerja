@@ -16,8 +16,9 @@
         <nav class="bg-white border-b border-slate-100 px-6 py-4 flex items-center justify-between sticky top-0 z-50">
             <x-partials.logo size="sm" :withText="true" />
             <div class="hidden md:flex items-center gap-6">
+                <a href="{{ route('jobs.index') }}" class="text-sm font-bold text-slate-500 hover:text-blue-600 transition">Explore Jobs</a>
                 <a href="{{ route('login') }}" class="text-sm font-bold text-slate-500 hover:text-blue-600 transition">Masuk</a>
-                <a href="{{ route('register') }}" class="px-5 py-2.5 border-2 border-blue-600 text-blue-600 font-bold rounded-full hover:bg-blue-50 transition text-sm">Gabung Sekarang</a>
+                <a href="{{ route('register') }}" class="px-5 py-2.5 border-2 border-blue-600 text-blue-600 font-bold rounded-full hover:bg-blue-50 transition text-sm">Masuk Sekarang</a>
             </div>
         </nav>
 
@@ -35,9 +36,12 @@
                 </p>
 
                 <!-- Mobile Actions (Hidden on Desktop) -->
-                <div class="md:hidden space-y-4 pt-4">
-                    <a href="{{ route('login') }}" class="block w-full py-4 px-6 bg-blue-600 text-white font-bold rounded-full shadow-lg text-lg">Masuk</a>
-                    <a href="{{ route('register') }}" class="block w-full py-4 px-6 border-2 border-slate-200 text-slate-700 font-bold rounded-full text-lg">Daftar Akun Baru</a>
+                <div class="md:hidden space-y-4 pt-4 px-4">
+                    <a href="{{ route('jobs.index') }}" class="block w-full py-4 px-6 bg-blue-600 text-white font-black rounded-full shadow-lg text-lg">Eksplorasi Lowongan</a>
+                    <div class="grid grid-cols-2 gap-4">
+                        <a href="{{ route('login') }}" class="block py-3 px-6 border-2 border-slate-200 text-slate-700 font-bold rounded-full text-sm">Masuk</a>
+                        <a href="{{ route('register') }}" class="block py-3 px-6 border-2 border-slate-200 text-slate-700 font-bold rounded-full text-sm">Daftar</a>
+                    </div>
                 </div>
             </div>
 

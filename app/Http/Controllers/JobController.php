@@ -54,29 +54,31 @@ class JobController extends Controller
     }
 
     /**
-     * Public applicant job feed (mobile view).
+     * Job feed (Public & Private).
+     * Uses LinkedIn-style Split View on Desktop.
      */
     public function index(Request $request)
     {
         $search = trim((string) $request->query('q', ''));
 
-        $jobs = JobListing::query()
+        $query = JobListing::query()
             ->with('company')
-            ->where('status', 'open')
-            ->when($search !== '', function ($query) use ($search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('title', 'like', "%{$search}%")
-                        ->orWhere('location', 'like', "%{$search}%")
-                        ->orWhereHas('company', fn ($c) => $c->where('name', 'like', "%{$search}%"));
-                });
-            })
-            ->latest()
-            ->paginate(10)
-            ->withQueryString();
+            ->where('status', 'open');
 
-        $appliedJobIds = Applicant::where('user_id', Auth::id())->pluck('job_listing_id')->all();
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                    ->orWhere('location', 'like', "%{$search}%")
+                    ->orWhereHas('company', fn ($c) => $c->where('name', 'like', "%{$search}%"));
+            });
+        }
 
-        return view('applicant.jobs', compact('jobs', 'search', 'appliedJobIds'));
+        $jobs = $query->latest()->paginate(15)->withQueryString();
+        $appliedJobIds = Auth::check() ? Applicant::where('user_id', Auth::id())->pluck('job_listing_id')->all() : [];
+
+        // Determine which view to use.
+        // We use the new "Explore" (Split View) as the primary professional interface.
+        return view('jobs.explore', compact('jobs', 'search', 'appliedJobIds'));
     }
 
     /**

@@ -91,10 +91,15 @@ class AuthController extends Controller
         return view('auth.introduction');
     }
 
-    public function login()
+    public function login(Request $request)
     {
         if (Auth::check()) {
             return $this->redirectBasedOnRole(Auth::user());
+        }
+
+        // Manual intended redirect support for LinkedIn-style guest flow
+        if ($request->has('intended')) {
+            session(['url.intended' => $request->query('intended')]);
         }
 
         return view('auth.login');
@@ -118,8 +123,13 @@ class AuthController extends Controller
         ]);
     }
 
-    public function register()
+    public function register(Request $request)
     {
+        // Manual intended redirect support for LinkedIn-style guest flow
+        if ($request->has('intended')) {
+            session(['url.intended' => $request->query('intended')]);
+        }
+
         return view('auth.register');
     }
 

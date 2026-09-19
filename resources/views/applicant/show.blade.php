@@ -62,34 +62,42 @@
             <aside class="lg:col-span-4">
                 <div class="sticky top-20 space-y-4">
                     <div class="glass-card p-6 bg-white" x-data="{ showForm: {{ $errors->any() ? 'true' : 'false' }}, busy: false }">
-                        @if ($hasApplied)
-                            <div class="text-center py-4 bg-emerald-50 text-emerald-700 rounded-xl border border-emerald-100 font-black uppercase tracking-widest text-sm">Sudah Melamar</div>
-                        @elseif ($jobListing->status !== 'open')
-                            <div class="text-center py-4 bg-slate-50 text-slate-400 rounded-xl border border-slate-100 font-black uppercase tracking-widest text-sm">Lowongan Ditutup</div>
-                        @else
-                            <div x-show="!showForm" class="space-y-4">
-                                <p class="text-xs font-bold text-slate-500 leading-relaxed text-center px-4">Lamar posisi ini sekarang dan bergabung dengan tim hebat kami.</p>
-                                <button @click="showForm = true" class="w-full py-4 bg-blue-600 text-white font-black rounded-full shadow-lg hover:bg-blue-700 transition-all text-lg">Lamar Sekarang</button>
+                        @guest
+                            <div class="space-y-4 text-center">
+                                <p class="text-xs font-bold text-slate-500 leading-relaxed px-4">Lamar posisi ini sekarang dan bergabung dengan tim hebat kami.</p>
+                                <a href="{{ route('login', ['intended' => url()->current()]) }}" class="block w-full py-4 bg-blue-600 text-white font-black rounded-full shadow-lg hover:bg-blue-700 transition-all text-lg text-center">Sign In to Apply</a>
+                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Belum punya akun? <a href="{{ route('register') }}" class="text-blue-600 hover:underline">Gabung Sekarang</a></p>
                             </div>
+                        @else
+                            @if ($hasApplied)
+                                <div class="text-center py-4 bg-emerald-50 text-emerald-700 rounded-xl border border-emerald-100 font-black uppercase tracking-widest text-sm">Sudah Melamar</div>
+                            @elseif ($jobListing->status !== 'open')
+                                <div class="text-center py-4 bg-slate-50 text-slate-400 rounded-xl border border-slate-100 font-black uppercase tracking-widest text-sm">Lowongan Ditutup</div>
+                            @else
+                                <div x-show="!showForm" class="space-y-4">
+                                    <p class="text-xs font-bold text-slate-500 leading-relaxed text-center px-4">Lamar posisi ini sekarang dan bergabung dengan tim hebat kami.</p>
+                                    <button @click="showForm = true" class="w-full py-4 bg-blue-600 text-white font-black rounded-full shadow-lg hover:bg-blue-700 transition-all text-lg">Lamar Sekarang</button>
+                                </div>
 
-                            <form x-show="showForm" method="POST" action="{{ route('jobs.apply', $jobListing) }}" class="space-y-6" @submit="busy = true" x-cloak>
-                                @csrf
-                                <div class="space-y-2">
-                                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Link CV / Resume</label>
-                                    <input type="url" name="resume" required placeholder="https://drive.google.com/..."
-                                        class="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl text-sm focus:outline-none focus:border-blue-600 transition">
-                                </div>
-                                <div class="space-y-2">
-                                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Surat Lamaran (Opsional)</label>
-                                    <textarea name="cover_letter" rows="4" class="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl text-sm focus:outline-none focus:border-blue-600 transition"></textarea>
-                                </div>
-                                <button type="submit" :disabled="busy" class="w-full py-4 bg-blue-600 text-white font-black rounded-full shadow-lg hover:bg-blue-700 transition-all">
-                                    <span x-show="!busy">Kirim Aplikasi</span>
-                                    <span x-show="busy">Mengirim...</span>
-                                </button>
-                                <button type="button" @click="showForm = false" class="w-full text-xs font-black text-slate-400 uppercase tracking-widest hover:text-red-500">Batal</button>
-                            </form>
-                        @endif
+                                <form x-show="showForm" method="POST" action="{{ route('jobs.apply', $jobListing) }}" class="space-y-6" @submit="busy = true" x-cloak>
+                                    @csrf
+                                    <div class="space-y-2">
+                                        <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Link CV / Resume</label>
+                                        <input type="url" name="resume" required placeholder="https://drive.google.com/..."
+                                            class="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl text-sm focus:outline-none focus:border-blue-600 transition">
+                                    </div>
+                                    <div class="space-y-2">
+                                        <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Surat Lamaran (Opsional)</label>
+                                        <textarea name="cover_letter" rows="4" class="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl text-sm focus:outline-none focus:border-blue-600 transition"></textarea>
+                                    </div>
+                                    <button type="submit" :disabled="busy" class="w-full py-4 bg-blue-600 text-white font-black rounded-full shadow-lg hover:bg-blue-700 transition-all">
+                                        <span x-show="!busy">Kirim Aplikasi</span>
+                                        <span x-show="busy">Mengirim...</span>
+                                    </button>
+                                    <button type="button" @click="showForm = false" class="w-full text-xs font-black text-slate-400 uppercase tracking-widest hover:text-red-500">Batal</button>
+                                </form>
+                            @endif
+                        @endguest
                     </div>
                 </div>
             </aside>
