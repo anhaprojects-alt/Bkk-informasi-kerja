@@ -10,10 +10,11 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-gradient-to-br from-slate-100 to-slate-200 font-sans antialiased text-slate-800">
-    <div class="max-w-md mx-auto min-h-screen bg-slate-50 flex flex-col justify-between p-6 shadow-[0_20px_50px_rgba(0,0,0,0.15)] border-x border-slate-200/50">
+    <div class="auth-shell">
+        <div class="auth-container min-h-screen md:min-h-[auto] flex flex-col justify-between p-6 relative overflow-hidden">
 
-        <!-- Header Controls & Logo -->
-        <div class="mt-2">
+            <!-- Header Controls & Logo -->
+            <div class="mt-2">
             <div class="flex items-center justify-between">
                 <a href="{{ route('login') }}" aria-label="Kembali ke halaman masuk"
                     class="inline-flex items-center justify-center p-3 bg-white border border-slate-200/70 rounded-xl text-slate-600 hover:text-blue-600 shadow-sm border-b-2 active:border-b-0 active:translate-y-[2px] transition-all">

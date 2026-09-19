@@ -50,7 +50,7 @@
         <!-- Main Content Area -->
         <div class="flex-1 flex flex-col overflow-hidden">
 
-            <header class="bg-white border-b border-slate-200/80 min-h-20 flex items-center justify-between gap-3 px-6 z-30 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+            <header class="bg-white border-b border-slate-200/80 min-h-16 flex items-center justify-between gap-3 px-6 z-30 shadow-sm sticky top-0 backdrop-blur-md bg-white/90">
                 <div class="flex items-center gap-3">
                     <div class="md:hidden">
                         <x-partials.logo size="sm" :withText="false" />

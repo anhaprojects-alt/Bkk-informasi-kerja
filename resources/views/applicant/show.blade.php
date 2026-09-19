@@ -7,7 +7,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-gradient-to-br from-slate-100 to-slate-200 font-sans antialiased text-slate-800">
-    <div class="max-w-md mx-auto min-h-screen bg-slate-50 flex flex-col shadow-[0_20px_50px_rgba(0,0,0,0.15)] border-x border-slate-200/50 relative" x-data="{ showForm: {{ $errors->any() ? 'true' : 'false' }}, busy: false }">
+    <div class="applicant-shell" x-data="{ showForm: {{ $errors->any() ? 'true' : 'false' }}, busy: false }">
 
         <!-- Header -->
         <header class="p-5 bg-white border-b border-slate-200/60 shadow-sm sticky top-0 z-40 backdrop-blur-md bg-white/95">

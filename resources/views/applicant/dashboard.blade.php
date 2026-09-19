@@ -7,7 +7,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-gradient-to-br from-slate-100 to-slate-200 font-sans antialiased text-slate-800">
-    <div class="max-w-md mx-auto min-h-screen bg-slate-50 flex flex-col shadow-[0_20px_50px_rgba(0,0,0,0.15)] border-x border-slate-200/50 relative">
+    <div class="applicant-shell">
 
         <!-- Header -->
         <header class="p-5 sticky top-0 bg-white/90 backdrop-blur-md z-40 border-b border-slate-200/60 shadow-[0_2px_10px_rgba(0,0,0,0.02)] flex items-center justify-between">
