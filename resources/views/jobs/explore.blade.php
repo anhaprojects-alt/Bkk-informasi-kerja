@@ -204,23 +204,6 @@
                                 <button class="px-10 py-3.5 border-2 border-blue-600 text-blue-600 font-black rounded-full hover:bg-blue-50 transition-all text-base">Save</button>
                             </div>
 
-                            <!-- Premium AI Insight Widget (Simulated like LinkedIn) -->
-                            <div class="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-6 relative overflow-hidden shadow-sm">
-                                <div class="absolute -right-4 top-0 w-24 h-24 bg-amber-200/20 rounded-full blur-2xl"></div>
-                                <div class="flex items-center gap-2 mb-3">
-                                    <span class="bg-amber-400 text-[9px] font-black text-white px-1.5 py-0.5 rounded uppercase tracking-widest">Premium</span>
-                                    <h4 class="text-sm font-black text-slate-800 uppercase tracking-tight">AI Fit Analysis</h4>
-                                </div>
-                                <p class="text-xs text-slate-600 font-medium leading-relaxed mb-6">Analisis cerdas BKK menunjukkan kecocokan kualifikasi Anda sebesar <span class="font-black text-blue-600">85%</span>.</p>
-                                <div class="flex flex-wrap gap-2">
-                                    <button class="px-4 py-2 bg-white border border-slate-200 rounded-full text-[11px] font-black text-slate-700 hover:border-amber-400 transition-colors flex items-center gap-2">
-                                        <span class="w-2 h-2 bg-amber-400 rounded-full animate-pulse"></span>
-                                        Am I a good fit?
-                                    </button>
-                                    <button class="px-4 py-2 bg-white border border-slate-200 rounded-full text-[11px] font-black text-slate-700 hover:border-amber-400 transition-colors">Improve my CV</button>
-                                </div>
-                            </div>
-
                             <!-- Detailed Sections -->
                             <div class="space-y-10 pt-4 pb-12">
                                 <section>
