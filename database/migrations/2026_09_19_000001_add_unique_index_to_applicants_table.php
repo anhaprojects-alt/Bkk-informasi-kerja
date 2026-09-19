@@ -6,22 +6,16 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::table('applicants', function (Blueprint $table) {
+        Schema::table('applicants', function (Blueprint $table): void {
             $table->unique(['user_id', 'job_listing_id']);
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::table('applicants', function (Blueprint $table) {
+        Schema::table('applicants', function (Blueprint $table): void {
             $table->dropUnique(['user_id', 'job_listing_id']);
         });
     }

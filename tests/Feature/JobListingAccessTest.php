@@ -22,17 +22,15 @@ class JobListingAccessTest extends TestCase
             'description' => 'Description',
         ]);
 
-        $this->actingAs($admin)
-            ->post('/admin/jobs', [
-                'company_id' => $company->id,
-                'title' => 'Backend Developer',
-                'description' => 'Build and support internal APIs.',
-                'requirements' => 'PHP and Laravel experience.',
-                'location' => 'Jakarta',
-                'salary' => 'Rp 12.000.000',
-                'status' => 'open',
-            ])
-            ->assertRedirect('/admin/dashboard');
+        $this->actingAs($admin)->post('/admin/jobs', [
+            'company_id' => $company->id,
+            'title' => 'Backend Developer',
+            'description' => 'Build and support internal APIs.',
+            'requirements' => 'PHP and Laravel experience.',
+            'location' => 'Jakarta',
+            'salary' => 'Rp 12.000.000',
+            'status' => 'open',
+        ])->assertRedirect('/admin/dashboard');
 
         $this->assertDatabaseHas('job_listings', [
             'company_id' => $company->id,
@@ -48,14 +46,12 @@ class JobListingAccessTest extends TestCase
             'name' => 'Owner Company',
             'description' => 'Owner company description',
         ]);
-
         $otherUser = User::factory()->create(['role' => 'company']);
         Company::create([
             'user_id' => $otherUser->id,
             'name' => 'Other Company',
             'description' => 'Other company description',
         ]);
-
         $job = JobListing::create([
             'company_id' => $ownerCompany->id,
             'title' => 'Frontend Developer',
@@ -79,7 +75,6 @@ class JobListingAccessTest extends TestCase
             'name' => 'PT Karya Baru',
             'description' => 'Description',
         ]);
-
         $job = JobListing::create([
             'company_id' => $company->id,
             'title' => 'QA Engineer',
@@ -100,13 +95,10 @@ class JobListingAccessTest extends TestCase
         ])->assertRedirect('/applicant/dashboard');
 
         $applicant = User::where('email', 'pelamarbaru@example.com')->firstOrFail();
-
-        $this->actingAs($applicant)
-            ->post('/applicant/jobs/'.$job->id.'/apply', [
-                'resume' => 'https://example.com/cv.pdf',
-                'cover_letter' => 'Saya tertarik dengan posisi ini.',
-            ])
-            ->assertRedirect('/applicant/applications');
+        $this->actingAs($applicant)->post('/applicant/jobs/'.$job->id.'/apply', [
+            'resume' => 'https://example.com/cv.pdf',
+            'cover_letter' => 'Saya tertarik dengan posisi ini.',
+        ])->assertRedirect('/applicant/applications');
 
         $this->assertDatabaseHas('applicants', [
             'user_id' => $applicant->id,
