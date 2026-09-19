@@ -60,6 +60,8 @@ class JobController extends Controller
     public function index(Request $request)
     {
         $search = trim((string) $request->query('q', ''));
+        $location = trim((string) $request->query('l', ''));
+        $remoteOnly = $request->boolean('remote');
 
         $query = JobListing::query()
             ->with('company')
@@ -68,9 +70,16 @@ class JobController extends Controller
         if ($search !== '') {
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
-                    ->orWhere('location', 'like', "%{$search}%")
                     ->orWhereHas('company', fn ($c) => $c->where('name', 'like', "%{$search}%"));
             });
+        }
+
+        if ($location !== '') {
+            $query->where('location', 'like', "%{$location}%");
+        }
+
+        if ($remoteOnly) {
+            $query->where('location', 'like', '%Remote%');
         }
 
         $jobs = $query->latest()->paginate(15)->withQueryString();
@@ -78,7 +87,7 @@ class JobController extends Controller
 
         // Determine which view to use.
         // We use the new "Explore" (Split View) as the primary professional interface.
-        return view('jobs.explore', compact('jobs', 'search', 'appliedJobIds'));
+        return view('jobs.explore', compact('jobs', 'search', 'location', 'remoteOnly', 'appliedJobIds'));
     }
 
     /**

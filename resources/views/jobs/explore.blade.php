@@ -22,23 +22,35 @@
 
     <div class="applicant-shell">
         <!-- LinkedIn Style Header -->
-        <header class="bg-white border-b border-slate-200 h-14 sticky top-0 z-50 flex items-center shadow-sm">
+    <header class="bg-white border-b border-slate-200 h-14 sticky top-0 z-50 flex items-center shadow-sm">
         <div class="linkedin-container flex items-center justify-between gap-4">
-            <div class="flex items-center gap-4">
+            <div class="flex items-center gap-4 flex-1">
                 <a href="{{ route('home') }}"><x-partials.logo size="sm" :withText="false" /></a>
 
-                <form action="{{ route('jobs.index') }}" method="GET" class="hidden lg:flex items-center gap-1">
-                    <div class="relative group">
-                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-                        </span>
-                        <input type="search" name="q" value="{{ $search }}" placeholder="Jobs" class="bg-[#eef3f8] border-none rounded-l-md py-1.5 pl-10 pr-4 text-sm w-48 focus:ring-2 focus:ring-blue-600 transition-all">
-                    </div>
-                    <div class="relative group">
-                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /></svg>
-                        </span>
-                        <input type="text" placeholder="Location" class="bg-[#eef3f8] border-none rounded-r-md py-1.5 pl-10 pr-4 text-sm w-48 focus:ring-2 focus:ring-blue-600 transition-all border-l border-white">
+                <form action="{{ route('jobs.index') }}" method="GET" class="hidden lg:flex items-center flex-1 max-w-2xl">
+                    <div class="flex items-center flex-1 bg-[#eef3f8] rounded-md overflow-hidden border border-transparent focus-within:border-blue-600 focus-within:ring-1 focus-within:ring-blue-600 transition-all">
+                        <!-- Job Keyword Input -->
+                        <div class="relative flex-1">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                            </span>
+                            <input type="search" name="q" value="{{ $search }}" placeholder="Cari posisi atau perusahaan"
+                                class="bg-transparent border-none py-2 pl-9 pr-4 text-sm w-full focus:ring-0">
+                        </div>
+
+                        <!-- Divider Line -->
+                        <div class="h-6 w-px bg-slate-300"></div>
+
+                        <!-- Location Input -->
+                        <div class="relative flex-1">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                            </span>
+                            <input type="text" name="l" value="{{ $location }}" placeholder="Kota atau wilayah"
+                                class="bg-transparent border-none py-2 pl-9 pr-4 text-sm w-full focus:ring-0">
+                        </div>
+
+                        <button type="submit" class="hidden">Cari</button>
                     </div>
                 </form>
             </div>
@@ -64,13 +76,31 @@
         </div>
     </header>
 
-    <div class="linkedin-container mt-6">
-        <!-- Mobile Search (Hidden on Desktop) -->
-        <div class="lg:hidden mb-4">
-            <form action="{{ route('jobs.index') }}" method="GET" class="relative">
-                <input type="search" name="q" value="{{ $search }}" placeholder="Cari lowongan..." class="w-full bg-white border border-slate-200 rounded-xl py-3 px-4 shadow-sm focus:ring-2 focus:ring-blue-600">
+    <!-- Smart Filter Bar (Sub-header) -->
+    <div class="bg-white border-b border-slate-200 sticky top-14 z-40 hidden lg:block shadow-sm">
+        <div class="linkedin-container py-3">
+            <form action="{{ route('jobs.index') }}" method="GET" class="flex items-center gap-3">
+                <!-- Keep search values -->
+                <input type="hidden" name="q" value="{{ $search }}">
+                <input type="hidden" name="l" value="{{ $location }}">
+
+                <button type="submit" name="remote" value="{{ $remoteOnly ? '0' : '1' }}"
+                    class="px-4 py-1.5 rounded-full border transition-all text-sm font-black flex items-center gap-2 {{ $remoteOnly ? 'bg-emerald-600 border-emerald-700 text-white shadow-md' : 'border-slate-300 text-slate-600 hover:bg-slate-50' }}">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 002 2h1.5a2.5 2.5 0 012.5 2.5V14a2 2 0 002 2h.5m-6-12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    Remote Only
+                </button>
+
+                <div class="h-6 w-px bg-slate-200 mx-2"></div>
+
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Live Tracking:</span>
+                <span class="text-sm font-black text-blue-600 bg-blue-50 px-2 py-1 rounded-lg border border-blue-100">{{ $jobs->total() }} Peluang Aktif</span>
+
+                <div class="flex-1"></div>
+
+                <button type="submit" class="px-6 py-2 bg-blue-600 text-white font-black rounded-full shadow-lg shadow-blue-100 hover:bg-blue-700 transition-all text-xs uppercase tracking-widest">Update Search</button>
             </form>
         </div>
+    </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-0 lg:border lg:border-slate-200 lg:rounded-xl lg:bg-white lg:overflow-hidden min-h-[calc(100vh-10rem)]">
 
