@@ -126,7 +126,7 @@
                     <div class="space-y-6 animate-fadeIn">
                         <div class="flex justify-between items-start">
                             <div class="flex gap-4">
-                                <div class="w-16 h-16 bg-slate-50 border border-slate-100 rounded-lg flex items-center justify-center">
+                                <div class="w-16 h-16 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center">
                                     <svg class="h-8 w-8 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
                                 </div>
                                 <div class="min-w-0">
@@ -175,10 +175,35 @@
                         </div>
                     </div>
                 </template>
-                <template x-if="!selectedJob">
-                    <div class="h-full flex flex-col items-center justify-center text-slate-300">
-                        <svg class="h-16 w-16 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-                        <p class="font-bold uppercase tracking-widest">Pilih lowongan untuk melihat detail</p>
+
+                <!-- COOL EMPTY STATE WITH INTERACTIVE LOGO -->
+                <template x-if="!selectedJobId">
+                    <div class="h-full flex flex-col items-center justify-center p-12 text-center space-y-8 animate-fadeIn bg-gradient-to-b from-white to-slate-50/50">
+                        <div class="relative group cursor-pointer">
+                            <!-- Floating Glow Effect -->
+                            <div class="absolute inset-0 bg-blue-400/20 rounded-full blur-3xl group-hover:bg-blue-500/30 transition-all duration-700 scale-150"></div>
+
+                            <!-- Large Interactive 3D Logo -->
+                            <div class="relative transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 ease-out">
+                                <x-partials.logo size="xl" :withText="false" />
+
+                                <!-- Decorative Floating Element -->
+                                <div class="absolute -top-4 -right-4 w-8 h-8 bg-amber-400 rounded-lg shadow-lg flex items-center justify-center text-white animate-bounce group-hover:animate-none">
+                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="max-w-xs space-y-3">
+                            <h2 class="text-2xl font-black text-slate-900 tracking-tight leading-tight">Mulai Langkah Karir Profesional Anda</h2>
+                            <p class="text-sm text-slate-500 font-medium leading-relaxed">Pilih salah satu lowongan di sebelah kiri untuk melihat detail, persyaratan, dan melakukan pendaftaran secara instan.</p>
+                        </div>
+
+                        <div class="flex gap-2 items-center text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+                            <span class="w-8 h-px bg-slate-200"></span>
+                            <span>Powered by BKK Intelligence</span>
+                            <span class="w-8 h-px bg-slate-200"></span>
+                        </div>
                     </div>
                 </template>
             </main>
