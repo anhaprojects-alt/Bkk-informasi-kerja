@@ -1,50 +1,28 @@
 <?php
 
-return [
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-    /*
-    |--------------------------------------------------------------------------
-    | Third Party Services
-    |--------------------------------------------------------------------------
-    |
-    | This file is for storing the credentials for third party services such
-    | as Resend, Postmark, AWS, and more. This file provides the de facto
-    | location for this type of information, allowing packages to have
-    | a conventional file to locate the various service credentials.
-    |
-    */
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('applicants', function (Blueprint $table) {
+            $table->unique(['user_id', 'job_listing_id']);
+        });
+    }
 
-    'postmark' => [
-        'key' => env('POSTMARK_API_KEY'),
-    ],
-
-    'resend' => [
-        'key' => env('RESEND_API_KEY'),
-    ],
-
-    'ses' => [
-        'key' => env('AWS_ACCESS_KEY_ID'),
-        'secret' => env('AWS_SECRET_ACCESS_KEY'),
-        'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
-    ],
-
-    'slack' => [
-        'notifications' => [
-            'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),
-            'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
-        ],
-    ],
-
-    'firebase' => [
-        'project_id' => env('FIREBASE_PROJECT_ID'),
-        'api_key' => env('FIREBASE_API_KEY'),
-        'auth_domain' => env('FIREBASE_AUTH_DOMAIN'),
-        'storage_bucket' => env('FIREBASE_STORAGE_BUCKET'),
-        'messaging_sender_id' => env('FIREBASE_MESSAGING_SENDER_ID'),
-        'app_id' => env('FIREBASE_APP_ID'),
-        'measurement_id' => env('FIREBASE_MEASUREMENT_ID'),
-        'credentials_json' => env('FIREBASE_CREDENTIALS_JSON'),
-        'server_key' => env('FIREBASE_SERVER_KEY'),
-    ],
-
-];
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('applicants', function (Blueprint $table) {
+            $table->dropUnique(['user_id', 'job_listing_id']);
+        });
+    }
+};
