@@ -3,120 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <link rel="manifest" href="/manifest.json">
     <title>BKK - {{ $jobListing->title }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="bg-gradient-to-br from-slate-100 to-slate-200 font-sans antialiased text-slate-800">
-    <div class="applicant-shell" x-data="{ showForm: {{ $errors->any() ? 'true' : 'false' }}, busy: false }">
+<body class="bg-[#f3f2ef] font-sans antialiased text-slate-800 pwa-optimized">
 
-        <!-- Header -->
-        <header class="p-5 bg-white border-b border-slate-200/60 shadow-sm sticky top-0 z-40 backdrop-blur-md bg-white/95">
-            <div class="flex items-center justify-between">
-                <a href="{{ route('jobs.index') }}" aria-label="Kembali ke daftar lowongan"
-                    class="inline-flex items-center justify-center p-3 bg-white border border-slate-200/70 rounded-xl text-slate-600 hover:text-blue-600 shadow-sm border-b-2 active:border-b-0 active:translate-y-[2px] transition-all">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-                    </svg>
-                </a>
-                <x-partials.logo size="sm" :withText="false" />
-            </div>
-
-            <div class="mt-5 space-y-1">
-                <h1 class="text-xl font-black text-slate-900 tracking-tight leading-tight">{{ $jobListing->title }}</h1>
-                <p class="text-xs font-bold text-blue-600/80">{{ $jobListing->company->name ?? 'Perusahaan Mitra' }} &middot; <span class="text-slate-500 font-medium">{{ $jobListing->location }}</span></p>
-            </div>
-
-            @if ($jobListing->salary)
-                <div class="mt-3 inline-flex py-1.5 px-3 bg-amber-50 border border-amber-200/40 text-amber-700 rounded-xl font-bold text-xs shadow-[inset_0_1px_2px_rgba(255,255,255,1)]">
-                    {{ $jobListing->salary }}
-                </div>
-            @endif
-        </header>
-
-        <!-- Main Content -->
-        <main class="flex-1 overflow-y-auto p-5 space-y-6 pb-32">
-            @if (session('status'))
-                <div role="status" class="p-3.5 bg-gradient-to-r from-emerald-50 to-emerald-100/50 border border-emerald-200 text-emerald-800 text-xs font-semibold rounded-xl shadow-sm">
-                    {{ session('status') }}
-                </div>
-            @endif
-
-            <!-- Description Box 3D -->
-            <section class="bg-white p-5 rounded-3xl border border-slate-200/60 shadow-[0_4px_15px_rgba(0,0,0,0.02)]">
-                <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 border-l-4 border-blue-500 pl-2">Deskripsi Pekerjaan</h2>
-                <p class="text-xs font-medium text-slate-600 leading-relaxed whitespace-pre-line">{{ $jobListing->description }}</p>
-            </section>
-
-            <!-- Requirements Box 3D -->
-            <section class="bg-white p-5 rounded-3xl border border-slate-200/60 shadow-[0_4px_15px_rgba(0,0,0,0.02)]">
-                <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 border-l-4 border-blue-500 pl-2">Persyaratan</h2>
-                <p class="text-xs font-medium text-slate-600 leading-relaxed whitespace-pre-line">{{ $jobListing->requirements }}</p>
-            </section>
-
-            <!-- Apply Form Box 3D -->
-            @if (! $hasApplied && $jobListing->status === 'open')
-                <section x-show="showForm" x-cloak class="pt-2" x-transition>
-                    @if ($errors->any())
-                        <div role="alert" class="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-xs font-semibold rounded-xl shadow-sm">
-                            Periksa kembali isian Anda di bawah ini.
-                        </div>
-                    @endif
-
-                    <form method="POST" action="{{ route('jobs.apply', $jobListing) }}" class="space-y-4 bg-white p-5 rounded-3xl border border-slate-200/60 shadow-md" x-on:submit="busy = true">
-                        @csrf
-                        <div class="space-y-1.5">
-                            <label for="resume" class="block text-xs font-bold uppercase tracking-wider text-slate-400">Link CV / Resume</label>
-                            <input type="url" id="resume" name="resume" required inputmode="url" autocomplete="url" spellcheck="false"
-                                value="{{ old('resume') }}" placeholder="https://drive.google.com/..."
-                                @error('resume') aria-invalid="true" aria-describedby="resume-error" @else aria-describedby="resume-help" @enderror
-                                class="block w-full px-4 py-3 bg-slate-50/80 border rounded-2xl text-xs font-medium focus:outline-none focus:bg-white shadow-[inset_0_2px_4px_rgba(0,0,0,0.03)] focus:shadow-none transition duration-150 @error('resume') border-red-300 focus:ring-2 focus:ring-red-100 @else border-slate-200/80 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 @enderror">
-                            @error('resume')
-                                <p id="resume-error" class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
-                            @else
-                                <p id="resume-help" class="text-[11px] text-slate-400 font-medium">Tempelkan tautan CV Anda (misal Google Drive). Pastikan diawali https://</p>
-                            @enderror
-                        </div>
-
-                        <div class="space-y-1.5">
-                            <label for="cover_letter" class="block text-xs font-bold uppercase tracking-wider text-slate-400">Surat Lamaran (Opsional)</label>
-                            <textarea id="cover_letter" name="cover_letter" rows="4" placeholder="Ceritakan mengapa Anda cocok untuk posisi ini..."
-                                @error('cover_letter') aria-invalid="true" aria-describedby="cover_letter-error" @enderror
-                                class="block w-full px-4 py-3 bg-slate-50/80 border rounded-2xl text-xs font-medium focus:outline-none focus:bg-white shadow-[inset_0_2px_4px_rgba(0,0,0,0.03)] focus:shadow-none transition duration-150 @error('cover_letter') border-red-300 focus:ring-2 focus:ring-red-100 @else border-slate-200/80 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 @enderror">{{ old('cover_letter') }}</textarea>
-                            @error('cover_letter')
-                                <p id="cover_letter-error" class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <button type="submit" :disabled="busy" :class="busy && 'opacity-60 cursor-not-allowed'"
-                            class="w-full py-4 px-6 bg-gradient-to-b from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white font-bold rounded-2xl shadow-[0_8px_20px_rgba(29,78,216,0.25)] border-b-4 border-blue-900 active:border-b-0 active:translate-y-[4px] transition-all duration-150">
-                            <span x-show="!busy">Kirim Lamaran</span>
-                            <span x-show="busy" x-cloak>Mengirim...</span>
-                        </button>
-                    </form>
-                </section>
-            @endif
-        </main>
-
-        <!-- Sticky Bottom Action Bar 3D -->
-        <div class="fixed bottom-0 inset-x-4 max-w-md mx-auto p-4 mb-20 bg-slate-50/90 backdrop-blur-md border border-slate-200/40 rounded-3xl shadow-lg pointer-events-none">
-            <div class="pointer-events-auto">
-                @if ($hasApplied)
-                    <div class="w-full py-3.5 px-4 bg-gradient-to-r from-emerald-50 to-emerald-100/50 border border-emerald-200 text-emerald-800 font-bold rounded-2xl text-center shadow-sm text-xs uppercase tracking-wider">Anda sudah melamar</div>
-                @elseif ($jobListing->status !== 'open')
-                    <div class="w-full py-3.5 px-4 bg-slate-100 text-slate-500 font-bold rounded-2xl text-center text-xs uppercase tracking-wider">Lowongan sudah ditutup</div>
-                @else
-                    <button type="button" x-show="!showForm" x-on:click="showForm = true; $nextTick(() => document.getElementById('resume')?.focus())"
-                        class="w-full py-4 px-6 bg-gradient-to-b from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white font-bold rounded-2xl shadow-[0_8px_25px_rgba(29,78,216,0.3)] border-b-4 border-blue-900 active:border-b-0 active:translate-y-[4px] transition-all duration-150 text-center text-sm">
-                        Lamar Sekarang
-                    </button>
-                    <p x-show="showForm" x-cloak class="text-center text-[11px] font-bold text-slate-400 uppercase tracking-wider py-1">Lengkapi formulir di atas untuk mengirim lamaran.</p>
-                @endif
-            </div>
+    <header class="bg-white border-b border-slate-200 h-14 sticky top-0 z-50 flex items-center">
+        <div class="linkedin-container flex items-center justify-between">
+            <a href="{{ route('jobs.index') }}" class="flex items-center gap-2 text-slate-500 hover:text-blue-600 transition">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
+                <span class="text-sm font-black uppercase tracking-widest">Kembali</span>
+            </a>
+            <x-partials.logo size="sm" :withText="false" />
         </div>
+    </header>
 
-        <!-- Floating Bottom Dock Nav component -->
-        @include('applicant.partials.bottom-nav', ['active' => 'jobs'])
+    <div class="linkedin-container mt-6 pb-24">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
+            <main class="lg:col-span-8 space-y-6">
+                <!-- Job Header Card -->
+                <div class="glass-card p-6">
+                    <div class="flex gap-4 items-start mb-6">
+                        <div class="w-16 h-16 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-center text-slate-300">
+                            <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h1 class="text-2xl font-black text-slate-900 leading-tight">{{ $jobListing->title }}</h1>
+                            <p class="text-blue-600 font-bold mt-1 text-lg">{{ $jobListing->company->name ?? 'Mitra Terpercaya' }}</p>
+                            <p class="text-slate-500 font-medium text-sm mt-1">{{ $jobListing->location }} • <span class="text-slate-400 font-bold uppercase text-[10px] tracking-widest">{{ $jobListing->created_at->diffForHumans() }}</span></p>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap gap-3 pt-6 border-t border-slate-100">
+                        @if ($jobListing->salary)
+                            <span class="bg-amber-50 text-amber-700 px-3 py-1.5 rounded-lg text-xs font-black border border-amber-100 uppercase tracking-tighter">Gaji: {{ $jobListing->salary }}</span>
+                        @endif
+                        <span class="bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg text-xs font-black border border-blue-100 uppercase tracking-widest">Full Time</span>
+                    </div>
+                </div>
+
+                <!-- Job Details -->
+                <div class="glass-card p-6 space-y-8">
+                    <section>
+                        <h2 class="text-sm font-black uppercase tracking-widest text-slate-400 mb-4 border-l-4 border-blue-600 pl-3">Deskripsi Pekerjaan</h2>
+                        <p class="text-slate-600 font-medium leading-relaxed whitespace-pre-line">{{ $jobListing->description }}</p>
+                    </section>
+
+                    <section>
+                        <h2 class="text-sm font-black uppercase tracking-widest text-slate-400 mb-4 border-l-4 border-blue-600 pl-3">Persyaratan Utama</h2>
+                        <p class="text-slate-600 font-medium leading-relaxed whitespace-pre-line">{{ $jobListing->requirements }}</p>
+                    </section>
+                </div>
+            </main>
+
+            <!-- SIDEBAR ACTION -->
+            <aside class="lg:col-span-4">
+                <div class="sticky top-20 space-y-4">
+                    <div class="glass-card p-6 bg-white" x-data="{ showForm: {{ $errors->any() ? 'true' : 'false' }}, busy: false }">
+                        @if ($hasApplied)
+                            <div class="text-center py-4 bg-emerald-50 text-emerald-700 rounded-xl border border-emerald-100 font-black uppercase tracking-widest text-sm">Sudah Melamar</div>
+                        @elseif ($jobListing->status !== 'open')
+                            <div class="text-center py-4 bg-slate-50 text-slate-400 rounded-xl border border-slate-100 font-black uppercase tracking-widest text-sm">Lowongan Ditutup</div>
+                        @else
+                            <div x-show="!showForm" class="space-y-4">
+                                <p class="text-xs font-bold text-slate-500 leading-relaxed text-center px-4">Lamar posisi ini sekarang dan bergabung dengan tim hebat kami.</p>
+                                <button @click="showForm = true" class="w-full py-4 bg-blue-600 text-white font-black rounded-full shadow-lg hover:bg-blue-700 transition-all text-lg">Lamar Sekarang</button>
+                            </div>
+
+                            <form x-show="showForm" method="POST" action="{{ route('jobs.apply', $jobListing) }}" class="space-y-6" @submit="busy = true" x-cloak>
+                                @csrf
+                                <div class="space-y-2">
+                                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Link CV / Resume</label>
+                                    <input type="url" name="resume" required placeholder="https://drive.google.com/..."
+                                        class="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl text-sm focus:outline-none focus:border-blue-600 transition">
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Surat Lamaran (Opsional)</label>
+                                    <textarea name="cover_letter" rows="4" class="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl text-sm focus:outline-none focus:border-blue-600 transition"></textarea>
+                                </div>
+                                <button type="submit" :disabled="busy" class="w-full py-4 bg-blue-600 text-white font-black rounded-full shadow-lg hover:bg-blue-700 transition-all">
+                                    <span x-show="!busy">Kirim Aplikasi</span>
+                                    <span x-show="busy">Mengirim...</span>
+                                </button>
+                                <button type="button" @click="showForm = false" class="w-full text-xs font-black text-slate-400 uppercase tracking-widest hover:text-red-500">Batal</button>
+                            </form>
+                        @endif
+                    </div>
+                </div>
+            </aside>
+
+        </div>
     </div>
+
+    @include('applicant.partials.bottom-nav', ['active' => 'jobs'])
 </body>
 </html>

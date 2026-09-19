@@ -6,71 +6,85 @@
     <meta name="description" content="BKK - Bursa Kerja Khusus. Akses informasi lowongan kerja terpercaya untuk alumni dan pencari kerja.">
     <meta name="theme-color" content="#1e40af">
     <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
-    <title>BKK - Selamat Datang</title>
+    <link rel="manifest" href="/manifest.json">
+    <title>BKK - Selamat Datang di Jaringan Karir Profesional</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="bg-gradient-to-br from-slate-100 to-slate-200 font-sans antialiased text-slate-800">
-    <div class="auth-shell">
-        <div class="auth-container min-h-screen md:min-h-[auto] flex flex-col justify-between p-6 relative overflow-hidden">
-            <!-- 3D Abstract Spheres / Background Decor -->
-            <div aria-hidden="true" class="absolute -top-16 -right-16 w-48 h-48 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full opacity-20 shadow-[inset_-10px_-10px_20px_rgba(0,0,0,0.2),0_15px_30px_rgba(30,64,175,0.2)]"></div>
-            <div aria-hidden="true" class="absolute top-1/2 -left-20 w-36 h-36 bg-gradient-to-br from-amber-300 to-amber-500 rounded-full opacity-20 shadow-[inset_-10px_-10px_20px_rgba(0,0,0,0.2),0_15px_30px_rgba(245,158,11,0.2)]"></div>
+<body class="bg-white font-sans antialiased text-slate-800 pwa-optimized">
+    <div class="app-shell">
+        <!-- Navigation Header -->
+        <nav class="bg-white border-b border-slate-100 px-6 py-4 flex items-center justify-between sticky top-0 z-50">
+            <x-partials.logo size="sm" :withText="true" />
+            <div class="hidden md:flex items-center gap-6">
+                <a href="{{ route('login') }}" class="text-sm font-bold text-slate-500 hover:text-blue-600 transition">Masuk</a>
+                <a href="{{ route('register') }}" class="px-5 py-2.5 border-2 border-blue-600 text-blue-600 font-bold rounded-full hover:bg-blue-50 transition text-sm">Gabung Sekarang</a>
+            </div>
+        </nav>
 
-            <!-- Header / Logo -->
-            <div class="mt-2 z-10">
-                <x-partials.logo size="sm" :withText="true" />
+        <!-- Main Professional Section -->
+        <main class="flex-1 flex flex-col md:flex-row items-center max-w-7xl mx-auto px-6 py-12 md:py-24 gap-12">
+            <!-- Left Content: Hero Text -->
+            <div class="flex-1 space-y-8 text-center md:text-left">
+                <h1 class="text-4xl md:text-6xl font-black text-blue-900 tracking-tight leading-[1.1]">
+                    Selamat datang di <br class="hidden md:block">
+                    <span class="text-blue-600">komunitas profesional</span> <br class="hidden md:block">
+                    alumni & pencari kerja.
+                </h1>
+                <p class="text-lg md:text-xl text-slate-500 max-w-xl font-medium leading-relaxed">
+                    BKK membantu Anda terhubung dengan peluang karir terbaik dari perusahaan mitra terpercaya secara cepat dan profesional.
+                </p>
+
+                <!-- Mobile Actions (Hidden on Desktop) -->
+                <div class="md:hidden space-y-4 pt-4">
+                    <a href="{{ route('login') }}" class="block w-full py-4 px-6 bg-blue-600 text-white font-bold rounded-full shadow-lg text-lg">Masuk</a>
+                    <a href="{{ route('register') }}" class="block w-full py-4 px-6 border-2 border-slate-200 text-slate-700 font-bold rounded-full text-lg">Daftar Akun Baru</a>
+                </div>
             </div>
 
-            <!-- Main Content (Premium 3D Presentation) -->
-            <div class="my-auto text-center px-2 z-10 space-y-8">
-                <!-- 3D Hero Display Box -->
-                <div aria-hidden="true" class="relative w-56 h-56 mx-auto bg-gradient-to-b from-white to-slate-100 rounded-3xl shadow-[0_15px_35px_rgba(0,0,0,0.08),inset_0_2px_4px_rgba(255,255,255,1)] border border-slate-200/60 flex items-center justify-center group transform transition duration-500 hover:rotate-1">
-                    <!-- Inner Float Card -->
-                    <div class="absolute -top-4 -right-4 p-4 bg-white shadow-[0_10px_25px_rgba(0,0,0,0.08)] border border-slate-100 rounded-2xl text-amber-500 transform transition duration-300 group-hover:translate-y-[-4px]">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 drop-shadow-[0_2px_4px_rgba(245,158,11,0.3)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                        </svg>
-                    </div>
+            <!-- Right Content: Interactive 3D Visual -->
+            <div class="flex-1 relative hidden md:flex justify-center">
+                <div class="relative w-full max-w-md aspect-square bg-slate-50 rounded-[4rem] border border-slate-100 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] flex items-center justify-center overflow-hidden">
+                    <!-- Abstract Background Blur -->
+                    <div class="absolute top-0 right-0 w-64 h-64 bg-blue-100 rounded-full blur-3xl opacity-50"></div>
+                    <div class="absolute bottom-0 left-0 w-64 h-64 bg-amber-100 rounded-full blur-3xl opacity-50"></div>
 
-                    <!-- Center High-Quality 3D Icon Presentation -->
-                    <div class="p-1 bg-slate-200/50 rounded-full shadow-[inset_0_2px_5px_rgba(0,0,0,0.05)]">
+                    <!-- Professional Card Float -->
+                    <div class="relative z-10 p-12 transform hover:scale-105 transition duration-500 cursor-default select-none">
                         <x-partials.logo size="xl" :withText="false" />
                     </div>
 
-                    <!-- Verified Badge Floating -->
-                    <div class="absolute -bottom-4 -left-4 p-3.5 bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-[0_10px_20px_rgba(16,185,129,0.3)] rounded-2xl text-white transform transition duration-300 group-hover:translate-y-[4px]">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
+                    <!-- Floating Stats Badge -->
+                    <div class="absolute top-12 right-12 bg-white p-4 rounded-2xl shadow-xl border border-slate-50 animate-bounce transition-all duration-1000">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center text-white">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-black uppercase text-slate-400">Verifikasi</p>
+                                <p class="text-sm font-bold text-slate-800">Alumni Terdaftar</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
+            </div>
+        </main>
 
-                <!-- Typography & Headlines -->
-                <div class="space-y-3">
-                    <h1 class="text-2xl font-black text-slate-900 tracking-tight leading-tight">
-                        Raih Karir Impianmu <br>
-                        <span class="bg-gradient-to-r from-blue-700 to-indigo-600 bg-clip-text text-transparent drop-shadow-[0_2px_10px_rgba(30,64,175,0.1)]">
-                            Lebih Cepat & Professional
-                        </span>
-                    </h1>
-                    <p class="text-slate-500 text-sm leading-relaxed px-4">
-                        Bursa Kerja Khusus memberikan akses eksklusif informasi lowongan kerja terpercaya bagi alumni dan publik secara profesional.
-                    </p>
+        <!-- Footer / Sub-text -->
+        <footer class="bg-slate-50 border-t border-slate-100 py-12 px-6">
+            <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+                <div class="flex items-center gap-4">
+                    <x-partials.logo size="sm" :withText="false" />
+                    <p class="text-sm text-slate-400 font-bold uppercase tracking-widest">&copy; 2026 BKK Informasi Kerja</p>
+                </div>
+                <div class="flex gap-8 text-sm font-bold text-slate-400">
+                    <a href="#" class="hover:text-blue-600">Tentang Kami</a>
+                    <a href="#" class="hover:text-blue-600">Kebijakan Privasi</a>
+                    <a href="#" class="hover:text-blue-600">Pusat Bantuan</a>
                 </div>
             </div>
-
-            <!-- Action Buttons (Tactile 3D Action Style) -->
-            <div class="space-y-4 mb-4 z-10">
-                <a href="{{ route('login') }}"
-                class="block w-full py-4 px-6 bg-gradient-to-b from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white font-bold text-center rounded-2xl shadow-[0_8px_20px_rgba(29,78,216,0.3)] border-b-4 border-blue-900 active:border-b-0 active:translate-y-[4px] transition-all duration-150">
-                    Masuk ke Akun
-                </a>
-                <a href="{{ route('register') }}"
-                class="block w-full py-4 px-6 bg-white hover:bg-slate-50 text-slate-700 font-bold text-center rounded-2xl shadow-[0_8px_16px_rgba(0,0,0,0.04)] border border-slate-200/80 border-b-4 border-slate-300/80 active:border-b-0 active:translate-y-[4px] transition-all duration-150">
-                    Daftar Publik Baru
-                </a>
-            </div>
-        </div>
+        </footer>
     </div>
 </body>
 </html>
