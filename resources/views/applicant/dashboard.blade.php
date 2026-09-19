@@ -8,10 +8,10 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-[#f3f2ef] font-sans antialiased text-slate-800 pwa-optimized">
-
-    <!-- Top Navigation (Professional Fixed Bar) -->
-    <header class="bg-white border-b border-slate-200 h-14 sticky top-0 z-50 flex items-center">
-        <div class="linkedin-container flex items-center justify-between gap-4">
+    <div class="applicant-shell">
+        <!-- Top Navigation (Professional Fixed Bar) -->
+        <header class="bg-white border-b border-slate-200 h-14 sticky top-0 z-50 flex items-center">
+            <div class="linkedin-container flex items-center justify-between gap-4">
             <div class="flex items-center gap-3">
                 <x-partials.logo size="sm" :withText="false" />
                 <div class="relative group hidden sm:block">
@@ -199,6 +199,6 @@
 
     <!-- Floating Bottom Dock (Mobile Only) -->
     @include('applicant.partials.bottom-nav', ['active' => 'dashboard'])
-
+    </div>
 </body>
 </html>

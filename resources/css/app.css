@@ -67,8 +67,30 @@
 
     /* Auth Shell: Centered Card on Desktop, Full screen on Mobile */
     .auth-shell {
-        @apply app-shell justify-center items-center;
+        width: 100%;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        @apply justify-center items-center;
         background: #f3f2ef;
+    }
+
+    /* Applicant Shell: Adaptable Container */
+    .applicant-shell {
+        width: 100%;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        max-width: 80rem;
+        margin-inline: auto;
+        background: white;
+        box-shadow: 0 0 80px rgba(0, 0, 0, 0.03);
+    }
+
+    @media (max-width: 767px) {
+        .applicant-shell {
+            max-width: 100%;
+        }
     }
 
     .auth-container {
@@ -77,12 +99,12 @@
 
     @media (min-width: 768px) {
         .auth-container {
-            max-width: 28rem;
+            max-width: 26rem; /* Slightly smaller */
             min-height: auto !important;
-            border-radius: 1rem;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            border: 1px solid #e2e8f0;
-            padding: 2.5rem !important;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e5e7eb;
+            padding: 2rem !important;
         }
     }
 
@@ -114,9 +136,9 @@
 
     /* Tactile 3D Buttons (Modernized) */
     .btn-3d-primary {
-        @apply relative font-bold transition-all duration-150 border-b-4 active:border-b-0 active:translate-y-[2px] rounded-xl text-center px-6 py-3 bg-blue-600 text-white border-blue-800 hover:bg-blue-700;
+        @apply relative font-black transition-all duration-150 border-b-4 active:border-b-0 active:translate-y-[2px] rounded-xl text-center px-6 py-2.5 bg-blue-600 text-white border-blue-800 hover:bg-blue-700 text-sm uppercase tracking-wider;
     }
     .btn-3d-secondary {
-        @apply relative font-bold transition-all duration-150 border-b-4 active:border-b-0 active:translate-y-[2px] rounded-xl text-center px-6 py-3 bg-white text-slate-700 border-slate-300 hover:bg-slate-50;
+        @apply relative font-black transition-all duration-150 border-b-4 active:border-b-0 active:translate-y-[2px] rounded-xl text-center px-6 py-2.5 bg-white text-slate-700 border-slate-300 hover:bg-slate-50 text-sm uppercase tracking-wider;
     }
 }

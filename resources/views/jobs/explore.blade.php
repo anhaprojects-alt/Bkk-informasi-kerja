@@ -20,8 +20,9 @@
         }
     }">
 
-    <!-- LinkedIn Style Header -->
-    <header class="bg-white border-b border-slate-200 h-14 sticky top-0 z-50 flex items-center shadow-sm">
+    <div class="applicant-shell">
+        <!-- LinkedIn Style Header -->
+        <header class="bg-white border-b border-slate-200 h-14 sticky top-0 z-50 flex items-center shadow-sm">
         <div class="linkedin-container flex items-center justify-between gap-4">
             <div class="flex items-center gap-4">
                 <a href="{{ route('home') }}"><x-partials.logo size="sm" :withText="false" /></a>
@@ -193,5 +194,6 @@
         .animate-fadeIn { animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
+    </div>
 </body>
 </html>

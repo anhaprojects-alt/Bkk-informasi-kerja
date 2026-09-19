@@ -8,9 +8,9 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-[#f3f2ef] font-sans antialiased text-slate-800 pwa-optimized">
-
-    <header class="bg-white border-b border-slate-200 h-14 sticky top-0 z-50 flex items-center">
-        <div class="linkedin-container flex items-center justify-between">
+    <div class="applicant-shell">
+        <header class="bg-white border-b border-slate-200 h-14 sticky top-0 z-50 flex items-center">
+            <div class="linkedin-container flex items-center justify-between">
             <a href="{{ route('jobs.index') }}" class="flex items-center gap-2 text-slate-500 hover:text-blue-600 transition">
                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
                 <span class="text-sm font-black uppercase tracking-widest">Kembali</span>
@@ -106,5 +106,6 @@
     </div>
 
     @include('applicant.partials.bottom-nav', ['active' => 'jobs'])
+    </div>
 </body>
 </html>

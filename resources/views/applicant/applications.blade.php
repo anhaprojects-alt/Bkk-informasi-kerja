@@ -8,8 +8,8 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-[#f3f2ef] font-sans antialiased text-slate-800 pwa-optimized">
-
-    <header class="bg-white border-b border-slate-200 h-14 sticky top-0 z-50 flex items-center">
+    <div class="applicant-shell">
+        <header class="bg-white border-b border-slate-200 h-14 sticky top-0 z-50 flex items-center">
         <div class="linkedin-container flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <x-partials.logo size="sm" :withText="false" />
@@ -81,5 +81,6 @@
     </div>
 
     @include('applicant.partials.bottom-nav', ['active' => 'applications'])
+    </div>
 </body>
 </html>
