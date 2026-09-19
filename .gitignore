@@ -19,6 +19,7 @@
 /public/hot
 /public/storage
 /storage/*.key
+/storage/app/firebase_credentials.json
 /storage/pail
 /vendor
 _ide_helper.php

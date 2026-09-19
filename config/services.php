@@ -26,6 +26,7 @@ return [
         'messaging_sender_id' => env('FIREBASE_MESSAGING_SENDER_ID'),
         'app_id' => env('FIREBASE_APP_ID'),
         'measurement_id' => env('FIREBASE_MEASUREMENT_ID'),
+        'credentials_path' => env('FIREBASE_CREDENTIALS', storage_path('app/firebase_credentials.json')),
         'credentials_json' => env('FIREBASE_CREDENTIALS_JSON'),
         'server_key' => env('FIREBASE_SERVER_KEY'),
     ],

@@ -68,25 +68,50 @@ class JobController extends Controller
             ->where('status', 'open');
 
         if ($search !== '') {
-            $query->where(function ($q) use ($search) {
+            $normalizedSearch = mb_strtolower($search);
+            $searchTerms = preg_split('/\s+/', $normalizedSearch, -1, PREG_SPLIT_NO_EMPTY) ?: [$normalizedSearch];
+
+            $query->where(function ($q) use ($search, $searchTerms) {
                 $q->where('title', 'like', "%{$search}%")
+                    ->orWhere('location', 'like', "%{$search}%")
                     ->orWhereHas('company', fn ($c) => $c->where('name', 'like', "%{$search}%"));
+
+                foreach ($searchTerms as $term) {
+                    $q->orWhere('title', 'like', "%{$term}%")
+                        ->orWhere('location', 'like', "%{$term}%")
+                        ->orWhereHas('company', fn ($c) => $c->where('name', 'like', "%{$term}%"));
+                }
             });
         }
 
         if ($location !== '') {
-            $query->where('location', 'like', "%{$location}%");
+            $locationTerms = preg_split('/[\s,\/\-]+/', strtolower($location), -1, PREG_SPLIT_NO_EMPTY) ?: [strtolower($location)];
+
+            $query->where(function ($q) use ($location, $locationTerms) {
+                $q->where('location', 'like', "%{$location}%");
+
+                foreach ($locationTerms as $term) {
+                    if ($term === '') {
+                        continue;
+                    }
+
+                    $q->orWhere('location', 'like', "%{$term}%");
+                }
+            });
         }
 
         if ($remoteOnly) {
-            $query->where('location', 'like', '%Remote%');
+            $query->where(function ($q) {
+                $q->where('location', 'like', '%Remote%')
+                    ->orWhere('location', 'like', '%WFA%')
+                    ->orWhere('location', 'like', '%WFH%')
+                    ->orWhere('location', 'like', '%Hybrid%');
+            });
         }
 
         $jobs = $query->latest()->paginate(15)->withQueryString();
         $appliedJobIds = Auth::check() ? Applicant::where('user_id', Auth::id())->pluck('job_listing_id')->all() : [];
 
-        // Determine which view to use.
-        // We use the new "Explore" (Split View) as the primary professional interface.
         return view('jobs.explore', compact('jobs', 'search', 'location', 'remoteOnly', 'appliedJobIds'));
     }
 

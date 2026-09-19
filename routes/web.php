@@ -47,4 +47,9 @@ Route::middleware('auth')->group(function () {
     // Profile Settings (Universal)
     Route::get('/settings/profile', [DashboardController::class, 'profile'])->name('settings.profile');
     Route::put('/settings/profile', [DashboardController::class, 'profileUpdate'])->name('settings.profile.update');
+
+    Route::get('/help-center', [DashboardController::class, 'helpCenter'])->name('help.center');
+    Route::get('/messages', [DashboardController::class, 'messagesIndex'])->name('messages.index');
+    Route::get('/messages/{user}', [DashboardController::class, 'messagesIndex'])->name('messages.show');
+    Route::post('/messages/{user}', [DashboardController::class, 'messagesStore'])->name('messages.store');
 });

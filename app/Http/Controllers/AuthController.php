@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 
@@ -61,17 +62,54 @@ class AuthController extends Controller
      */
     public function resetPasswordViaPhone(Request $request)
     {
-        // This endpoint is called after Firebase frontend verifies the phone.
-        // It requires a signed 'token' or 'uid' from Firebase if we want to be secure.
         $data = $request->validate([
             'phone_number' => 'required|string',
             'password' => 'required|min:8|confirmed',
-            'firebase_token' => 'required', // Verified on frontend
+            'firebase_token' => 'required',
         ]);
 
-        // Security Note: In a production app, you MUST verify the firebase_token
-        // using Firebase Admin SDK (kreait/laravel-firebase) to ensure the phone
-        // number really belongs to this session.
+        $apiKey = config('services.firebase.api_key');
+
+        if (empty($apiKey)) {
+            return back()->withErrors(['firebase_token' => 'Konfigurasi Firebase belum diaktifkan.']);
+        }
+
+        $firebaseResponse = Http::post('https://identitytoolkit.googleapis.com/v1/accounts:lookup?key='.$apiKey, [
+            'idToken' => $data['firebase_token'],
+        ]);
+
+        $firebaseUser = $firebaseResponse->json('users.0');
+
+        if ($firebaseResponse->failed() || ! $firebaseUser) {
+            return back()->withErrors(['firebase_token' => 'Token verifikasi Firebase tidak valid.']);
+        }
+
+        $firebasePhone = $firebaseUser['phoneNumber'] ?? null;
+
+        $normalizePhone = function (string $value): string {
+            $digits = preg_replace('/\D+/', '', $value) ?? '';
+
+            if ($digits === '') {
+                return '';
+            }
+
+            if (str_starts_with($digits, '62')) {
+                return '0'.substr($digits, 2);
+            }
+
+            if (str_starts_with($digits, '0')) {
+                return $digits;
+            }
+
+            return $digits;
+        };
+
+        $normalizedRequestPhone = $normalizePhone($data['phone_number']);
+        $normalizedFirebasePhone = $normalizePhone((string) $firebasePhone);
+
+        if ($normalizedRequestPhone !== '' && $normalizedFirebasePhone !== '' && $normalizedRequestPhone !== $normalizedFirebasePhone) {
+            return back()->withErrors(['firebase_token' => 'Token Firebase tidak cocok dengan nomor HP yang dimasukkan.']);
+        }
 
         $user = User::where('phone_number', $data['phone_number'])->first();
 

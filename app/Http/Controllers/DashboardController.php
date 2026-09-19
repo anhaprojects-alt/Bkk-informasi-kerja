@@ -5,10 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Applicant;
 use App\Models\Company;
 use App\Models\JobListing;
+use App\Models\Message;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class DashboardController extends Controller
 {
@@ -112,12 +114,50 @@ class DashboardController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,'.$user->id],
             'phone_number' => ['required', 'string', 'max:20', 'unique:users,phone_number,'.$user->id],
+            'headline' => ['nullable', 'string', 'max:120'],
+            'bio' => ['nullable', 'string', 'max:1000'],
+            'location' => ['nullable', 'string', 'max:255'],
+            'province' => ['nullable', 'string', 'max:100'],
+            'city' => ['nullable', 'string', 'max:100'],
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
+            'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
+            'banner' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
+            'cv' => ['nullable', 'file', 'mimes:pdf,doc,docx', 'max:5120'],
         ]);
 
         $user->name = $data['name'];
         $user->email = $data['email'];
         $user->phone_number = $data['phone_number'];
+        $user->headline = $data['headline'] ?? null;
+        $user->bio = $data['bio'] ?? null;
+        $user->location = $data['location'] ?? null;
+        $user->province = $data['province'] ?? null;
+        $user->city = $data['city'] ?? null;
+
+        if ($request->hasFile('avatar')) {
+            if ($user->avatar_path && Storage::disk('public')->exists($user->avatar_path)) {
+                Storage::disk('public')->delete($user->avatar_path);
+            }
+
+            $user->avatar_path = $request->file('avatar')->store('profiles/avatars', 'public');
+        }
+
+        if ($request->hasFile('banner')) {
+            if ($user->banner_path && Storage::disk('public')->exists($user->banner_path)) {
+                Storage::disk('public')->delete($user->banner_path);
+            }
+
+            $user->banner_path = $request->file('banner')->store('profiles/banners', 'public');
+        }
+
+        if ($request->hasFile('cv')) {
+            if ($user->cv_path && Storage::disk('public')->exists($user->cv_path)) {
+                Storage::disk('public')->delete($user->cv_path);
+            }
+
+            $user->cv_path = $request->file('cv')->store('profiles/cv', 'public');
+            $user->cv_name = $request->file('cv')->getClientOriginalName();
+        }
 
         if ($request->filled('password')) {
             $user->password = Hash::make($data['password']);
@@ -125,7 +165,50 @@ class DashboardController extends Controller
 
         $user->save();
 
-        return back()->with('status', 'Profil Anda berhasil diperbarui.');
+        return redirect()->route('settings.profile')->with('status', 'Profil Anda berhasil diperbarui.');
+    }
+
+    public function helpCenter()
+    {
+        return view('help.center');
+    }
+
+    public function messagesIndex(?User $user = null)
+    {
+        $participants = User::where('id', '!=', Auth::id())
+            ->orderBy('name')
+            ->get();
+
+        $activeUser = $user ?? $participants->first();
+
+        $messages = collect();
+
+        if ($activeUser) {
+            $messages = Message::where(function ($query) use ($activeUser) {
+                $query->where('sender_id', Auth::id())
+                    ->where('receiver_id', $activeUser->id);
+            })->orWhere(function ($query) use ($activeUser) {
+                $query->where('sender_id', $activeUser->id)
+                    ->where('receiver_id', Auth::id());
+            })->orderBy('created_at')->get();
+        }
+
+        return view('help.messages', compact('participants', 'activeUser', 'messages'));
+    }
+
+    public function messagesStore(Request $request, User $user)
+    {
+        $data = $request->validate([
+            'body' => ['required', 'string', 'max:2000'],
+        ]);
+
+        Message::create([
+            'sender_id' => Auth::id(),
+            'receiver_id' => $user->id,
+            'body' => trim($data['body']),
+        ]);
+
+        return redirect()->route('messages.show', $user)->with('status', 'Pesan berhasil dikirim.');
     }
 
     public function createJob()
