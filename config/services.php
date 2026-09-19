@@ -1,223 +1,50 @@
 <?php
 
-namespace App\Http\Controllers;
+return [
 
-use App\Models\User;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Password;
-use Illuminate\Support\Str;
+    /*
+    |--------------------------------------------------------------------------
+    | Third Party Services
+    |--------------------------------------------------------------------------
+    |
+    | This file is for storing the credentials for third party services such
+    | as Resend, Postmark, AWS, and more. This file provides the de facto
+    | location for this type of information, allowing packages to have
+    | a conventional file to locate the service credentials.
+    |
+    */
 
-class AuthController extends Controller
-{
-    public function showForgotPasswordForm()
-    {
-        return view('auth.forgot-password');
-    }
+    'postmark' => [
+        'key' => env('POSTMARK_API_KEY'),
+    ],
 
-    public function sendResetLinkEmail(Request $request)
-    {
-        $request->validate(['email' => 'required|email']);
+    'resend' => [
+        'key' => env('RESEND_API_KEY'),
+    ],
 
-        $status = Password::sendResetLink(
-            $request->only('email')
-        );
+    'ses' => [
+        'key' => env('AWS_ACCESS_KEY_ID'),
+        'secret' => env('AWS_SECRET_ACCESS_KEY'),
+        'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
+    ],
 
-        return $status === Password::RESET_LINK_SENT
-            ? back()->with(['status' => __($status)])
-            : back()->withErrors(['email' => __($status)]);
-    }
+    'slack' => [
+        'notifications' => [
+            'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),
+            'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
+        ],
+    ],
 
-    public function showResetPasswordForm(string $token)
-    {
-        return view('auth.reset-password', ['token' => $token]);
-    }
+    'firebase' => [
+        'project_id' => env('FIREBASE_PROJECT_ID'),
+        'api_key' => env('FIREBASE_API_KEY'),
+        'auth_domain' => env('FIREBASE_AUTH_DOMAIN'),
+        'storage_bucket' => env('FIREBASE_STORAGE_BUCKET'),
+        'messaging_sender_id' => env('FIREBASE_MESSAGING_SENDER_ID'),
+        'app_id' => env('FIREBASE_APP_ID'),
+        'measurement_id' => env('FIREBASE_MEASUREMENT_ID'),
+        'credentials_json' => env('FIREBASE_CREDENTIALS_JSON'),
+        'server_key' => env('FIREBASE_SERVER_KEY'),
+    ],
 
-    public function resetPassword(Request $request)
-    {
-        $request->validate([
-            'token' => 'required',
-            'email' => 'required|email',
-            'password' => 'required|min:8|confirmed',
-        ]);
-
-        $status = Password::reset(
-            $request->only('email', 'password', 'password_confirmation', 'token'),
-            function ($user, $password) {
-                $user->forceFill([
-                    'password' => Hash::make($password),
-                ])->setRememberToken(Str::random(60))->save();
-            }
-        );
-
-        return $status === Password::PASSWORD_RESET
-            ? redirect()->route('login')->with('status', __($status))
-            : back()->withErrors(['email' => [__($status)]]);
-    }
-
-    public function resetPasswordViaPhone(Request $request)
-    {
-        $data = $request->validate([
-            'phone_number' => ['required', 'string', 'max:20'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'firebase_token' => ['required', 'string'],
-        ]);
-
-        $firebaseApiKey = config('services.firebase.api_key');
-
-        if (blank($firebaseApiKey)) {
-            return back()->withErrors(['firebase_token' => 'Verifikasi nomor HP belum dikonfigurasi di server.']);
-        }
-
-        $lookupResponse = Http::acceptJson()->post(
-            'https://identitytoolkit.googleapis.com/v1/accounts:lookup?key='.$firebaseApiKey,
-            ['idToken' => $data['firebase_token']]
-        );
-
-        if ($lookupResponse->failed()) {
-            return back()->withErrors(['firebase_token' => 'Token Firebase tidak valid atau masa berlakunya sudah habis.']);
-        }
-
-        $firebasePhone = $lookupResponse->json('users.0.phoneNumber');
-
-        if (! is_string($firebasePhone) || blank($firebasePhone)) {
-            return back()->withErrors(['firebase_token' => 'Nomor HP pada token Firebase tidak ditemukan.']);
-        }
-
-        $normalizedFirebasePhone = $this->normalizePhoneNumber($firebasePhone);
-        $normalizedRequestPhone = $this->normalizePhoneNumber($data['phone_number']);
-
-        if ($normalizedFirebasePhone !== $normalizedRequestPhone) {
-            return back()->withErrors(['phone_number' => 'Nomor HP tidak cocok dengan token verifikasi Firebase.']);
-        }
-
-        $user = User::query()
-            ->whereNotNull('phone_number')
-            ->get()
-            ->first(fn (User $candidate) => $this->normalizePhoneNumber($candidate->phone_number) === $normalizedRequestPhone);
-
-        if (! $user) {
-            return back()->withErrors(['phone_number' => 'Nomor HP tidak terdaftar dalam sistem.']);
-        }
-
-        $user->update([
-            'password' => Hash::make($data['password']),
-        ]);
-
-        return redirect()->route('login')->with('status', 'Kata sandi berhasil diperbarui melalui verifikasi HP.');
-    }
-
-    public function introduction()
-    {
-        return view('auth.introduction');
-    }
-
-    public function login(Request $request)
-    {
-        if (Auth::check()) {
-            return $this->redirectBasedOnRole(Auth::user());
-        }
-
-        if ($request->has('intended')) {
-            session(['url.intended' => $request->query('intended')]);
-        }
-
-        return view('auth.login');
-    }
-
-    public function loginPost(Request $request)
-    {
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required'],
-        ]);
-
-        if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
-
-            return $this->redirectBasedOnRole(Auth::user());
-        }
-
-        return back()->withErrors([
-            'email' => 'Email atau kata sandi yang Anda masukkan salah.',
-        ]);
-    }
-
-    public function register(Request $request)
-    {
-        if ($request->has('intended')) {
-            session(['url.intended' => $request->query('intended')]);
-        }
-
-        return view('auth.register');
-    }
-
-    public function registerPost(Request $request)
-    {
-        $data = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'phone_number' => ['required', 'string', 'max:20', 'unique:users'],
-            'role' => ['required', 'in:applicant,company'],
-            'password' => ['required', 'string', 'min:8'],
-        ]);
-
-        $user = User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'phone_number' => $data['phone_number'],
-            'role' => $data['role'],
-            'password' => Hash::make($data['password']),
-        ]);
-
-        if ($user->role === 'company') {
-            $user->company()->create([
-                'name' => 'Perusahaan '.$user->name,
-                'description' => 'Profil deskripsi perusahaan baru.',
-            ]);
-        }
-
-        Auth::login($user);
-
-        return $this->redirectBasedOnRole($user);
-    }
-
-    public function logout(Request $request)
-    {
-        Auth::logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return redirect()->route('introduction');
-    }
-
-    private function normalizePhoneNumber(string $phone): string
-    {
-        $digits = preg_replace('/\D+/', '', $phone) ?? '';
-
-        if ($digits === '') {
-            return '';
-        }
-
-        if (str_starts_with($digits, '62')) {
-            $digits = '0'.substr($digits, 2);
-        }
-
-        return $digits;
-    }
-
-    private function redirectBasedOnRole($user)
-    {
-        if ($user->role === 'admin') {
-            return redirect()->intended('/admin/dashboard');
-        }
-
-        if ($user->role === 'company') {
-            return redirect()->intended('/admin/dashboard');
-        }
-
-        return redirect()->intended('/applicant/dashboard');
-    }
-}
+];
