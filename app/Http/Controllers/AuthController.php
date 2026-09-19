@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 
@@ -19,10 +20,7 @@ class AuthController extends Controller
     public function sendResetLinkEmail(Request $request)
     {
         $request->validate(['email' => 'required|email']);
-
-        $status = Password::sendResetLink(
-            $request->only('email')
-        );
+        $status = Password::sendResetLink($request->only('email'));
 
         return $status === Password::RESET_LINK_SENT
             ? back()->with(['status' => __($status)])
@@ -56,32 +54,47 @@ class AuthController extends Controller
             : back()->withErrors(['email' => [__($status)]]);
     }
 
-    /**
-     * Firebase Phone Verification Reset Logic
-     */
     public function resetPasswordViaPhone(Request $request)
     {
-        // This endpoint is called after Firebase frontend verifies the phone.
-        // It requires a signed 'token' or 'uid' from Firebase if we want to be secure.
         $data = $request->validate([
-            'phone_number' => 'required|string',
-            'password' => 'required|min:8|confirmed',
-            'firebase_token' => 'required', // Verified on frontend
+            'phone_number' => ['required', 'string', 'max:20'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'firebase_token' => ['required', 'string'],
         ]);
 
-        // Security Note: In a production app, you MUST verify the firebase_token
-        // using Firebase Admin SDK (kreait/laravel-firebase) to ensure the phone
-        // number really belongs to this session.
+        $apiKey = config('firebase.api_key');
+        if (blank($apiKey)) {
+            return back()->withErrors(['firebase_token' => 'Verifikasi nomor HP belum dikonfigurasi di server.']);
+        }
 
-        $user = User::where('phone_number', $data['phone_number'])->first();
+        $response = Http::acceptJson()->post(
+            'https://identitytoolkit.googleapis.com/v1/accounts:lookup?key='.$apiKey,
+            ['idToken' => $data['firebase_token']]
+        );
+
+        if ($response->failed()) {
+            return back()->withErrors(['firebase_token' => 'Token Firebase tidak valid atau masa berlakunya sudah habis.']);
+        }
+
+        $firebasePhone = $response->json('users.0.phoneNumber');
+        $requestedPhone = $this->normalizePhoneNumber($data['phone_number']);
+
+        if (! is_string($firebasePhone) || blank($firebasePhone)) {
+            return back()->withErrors(['firebase_token' => 'Nomor HP pada token Firebase tidak ditemukan.']);
+        }
+
+        if ($this->normalizePhoneNumber($firebasePhone) !== $requestedPhone) {
+            return back()->withErrors(['phone_number' => 'Nomor HP tidak cocok dengan token verifikasi Firebase.']);
+        }
+
+        $user = User::query()->whereNotNull('phone_number')->get()
+            ->first(fn (User $candidate) => $this->normalizePhoneNumber($candidate->phone_number) === $requestedPhone);
 
         if (! $user) {
             return back()->withErrors(['phone_number' => 'Nomor HP tidak terdaftar dalam sistem.']);
         }
 
-        $user->update([
-            'password' => Hash::make($data['password']),
-        ]);
+        $user->update(['password' => Hash::make($data['password'])]);
 
         return redirect()->route('login')->with('status', 'Kata sandi berhasil diperbarui melalui verifikasi HP.');
     }
@@ -97,7 +110,6 @@ class AuthController extends Controller
             return $this->redirectBasedOnRole(Auth::user());
         }
 
-        // Manual intended redirect support for LinkedIn-style guest flow
         if ($request->has('intended')) {
             session(['url.intended' => $request->query('intended')]);
         }
@@ -107,25 +119,18 @@ class AuthController extends Controller
 
     public function loginPost(Request $request)
     {
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required'],
-        ]);
+        $credentials = $request->validate(['email' => ['required', 'email'], 'password' => ['required']]);
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-
             return $this->redirectBasedOnRole(Auth::user());
         }
 
-        return back()->withErrors([
-            'email' => 'Email atau kata sandi yang Anda masukkan salah.',
-        ]);
+        return back()->withErrors(['email' => 'Email atau kata sandi yang Anda masukkan salah.']);
     }
 
     public function register(Request $request)
     {
-        // Manual intended redirect support for LinkedIn-style guest flow
         if ($request->has('intended')) {
             session(['url.intended' => $request->query('intended')]);
         }
@@ -151,7 +156,6 @@ class AuthController extends Controller
             'password' => Hash::make($data['password']),
         ]);
 
-        // If it's a company, initialize a blank company profile
         if ($user->role === 'company') {
             $user->company()->create([
                 'name' => 'Perusahaan '.$user->name,
@@ -160,7 +164,6 @@ class AuthController extends Controller
         }
 
         Auth::login($user);
-
         return $this->redirectBasedOnRole($user);
     }
 
@@ -169,18 +172,19 @@ class AuthController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-
         return redirect()->route('introduction');
+    }
+
+    private function normalizePhoneNumber(string $phone): string
+    {
+        $digits = preg_replace('/\D+/', '', $phone) ?? '';
+        return str_starts_with($digits, '62') ? '0'.substr($digits, 2) : $digits;
     }
 
     private function redirectBasedOnRole($user)
     {
-        if ($user->role === 'admin') {
-            return redirect()->intended('/admin/dashboard');
-        } elseif ($user->role === 'company') {
-            return redirect()->intended('/admin/dashboard'); // Let's use the shared backend panel
-        }
-
-        return redirect()->intended('/applicant/dashboard');
+        return in_array($user->role, ['admin', 'company'], true)
+            ? redirect()->intended('/admin/dashboard')
+            : redirect()->intended('/applicant/dashboard');
     }
 }
