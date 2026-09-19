@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Applicant;
 use App\Models\Company;
 use App\Models\JobListing;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class DashboardController extends Controller
 {
@@ -37,22 +39,93 @@ class DashboardController extends Controller
         $this->ensureStaff();
 
         $user = Auth::user();
-        $jobIds = (clone $this->scopedJobs())->pluck('id');
 
+        if ($user->role === 'admin') {
+            // Global Admin Statistics
+            $stats = [
+                'totalUsers' => User::count(),
+                'totalCompanies' => Company::count(),
+                'totalJobs' => JobListing::count(),
+                'totalApplicants' => Applicant::count(),
+                'pendingJobs' => JobListing::where('status', 'pending')->count(),
+            ];
+
+            $recentUsers = User::latest()->take(5)->get();
+            $recentJobs = JobListing::with('company')->latest()->take(5)->get();
+
+            return view('admin.dashboard', compact('stats', 'recentUsers', 'recentJobs'));
+        }
+
+        // Company specific statistics
+        $jobIds = $this->scopedJobs()->pluck('id');
         $stats = [
-            'companies' => $user->role === 'admin' ? Company::count() : ($user->company ? 1 : 0),
             'openJobs' => (clone $this->scopedJobs())->where('status', 'open')->count(),
-            'applicants' => Applicant::whereIn('job_listing_id', $jobIds)->count(),
+            'totalApplications' => Applicant::whereIn('job_listing_id', $jobIds)->count(),
+            'hiredCount' => Applicant::whereIn('job_listing_id', $jobIds)->where('status', 'accepted')->count(),
         ];
 
-        $jobs = (clone $this->scopedJobs())
-            ->with('company')
+        $jobs = $this->scopedJobs()
             ->withCount('applicants')
             ->latest()
             ->take(10)
             ->get();
 
         return view('admin.dashboard', compact('stats', 'jobs'));
+    }
+
+    /**
+     * User Management (Admin Only)
+     */
+    public function usersIndex()
+    {
+        abort_unless(Auth::user()->role === 'admin', 403);
+        $users = User::withCount('applications')->latest()->paginate(15);
+
+        return view('admin.users.index', compact('users'));
+    }
+
+    public function userDestroy(User $user)
+    {
+        abort_unless(Auth::user()->role === 'admin', 403);
+        abort_if($user->id === Auth::id(), 403, 'Anda tidak dapat menghapus akun Anda sendiri.');
+
+        $user->delete();
+
+        return back()->with('status', 'Pengguna berhasil dihapus dari sistem.');
+    }
+
+    /**
+     * Profile Settings (Universal)
+     */
+    public function profile()
+    {
+        $user = Auth::user();
+
+        return view('settings.profile', compact('user'));
+    }
+
+    public function profileUpdate(Request $request)
+    {
+        $user = Auth::user();
+
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,'.$user->id],
+            'phone_number' => ['required', 'string', 'max:20', 'unique:users,phone_number,'.$user->id],
+            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        $user->name = $data['name'];
+        $user->email = $data['email'];
+        $user->phone_number = $data['phone_number'];
+
+        if ($request->filled('password')) {
+            $user->password = Hash::make($data['password']);
+        }
+
+        $user->save();
+
+        return back()->with('status', 'Profil Anda berhasil diperbarui.');
     }
 
     public function createJob()

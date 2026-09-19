@@ -35,7 +35,16 @@ Route::middleware('auth')->group(function () {
 
     // Backend Dashboard for Admin & Perusahaan
     Route::get('/admin/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // User Management (Admin Only)
+    Route::get('/admin/users', [DashboardController::class, 'usersIndex'])->name('admin.users.index');
+    Route::delete('/admin/users/{user}', [DashboardController::class, 'userDestroy'])->name('admin.users.destroy');
+
     Route::get('/admin/jobs/create', [DashboardController::class, 'createJob'])->name('jobs.create');
     Route::post('/admin/jobs', [DashboardController::class, 'storeJob'])->name('jobs.store');
     Route::patch('/admin/jobs/{jobListing}/close', [DashboardController::class, 'closeJob'])->name('jobs.close');
+
+    // Profile Settings (Universal)
+    Route::get('/settings/profile', [DashboardController::class, 'profile'])->name('settings.profile');
+    Route::put('/settings/profile', [DashboardController::class, 'profileUpdate'])->name('settings.profile.update');
 });
