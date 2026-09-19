@@ -18,7 +18,7 @@
             <div class="hidden md:flex items-center gap-6">
                 <a href="{{ route('jobs.index') }}" class="text-sm font-bold text-slate-500 hover:text-blue-600 transition">Explore Jobs</a>
                 <a href="{{ route('login') }}" class="text-sm font-bold text-slate-500 hover:text-blue-600 transition">Masuk</a>
-                <a href="{{ route('register') }}" class="px-5 py-2.5 border-2 border-blue-600 text-blue-600 font-bold rounded-full hover:bg-blue-50 transition text-sm">Masuk Sekarang</a>
+                <a href="{{ route('register') }}" class="px-5 py-2.5 border-2 border-blue-600 text-blue-600 font-bold rounded-full hover:bg-blue-50 transition text-sm">Bergabung Sekarang</a>
             </div>
         </nav>
 

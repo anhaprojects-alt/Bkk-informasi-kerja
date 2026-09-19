@@ -65,6 +65,27 @@
         flex-direction: column;
     }
 
+    /* Auth Shell: Centered Card on Desktop, Full screen on Mobile */
+    .auth-shell {
+        @apply app-shell justify-center items-center;
+        background: #f3f2ef;
+    }
+
+    .auth-container {
+        @apply w-full flex flex-col bg-white;
+    }
+
+    @media (min-width: 768px) {
+        .auth-container {
+            max-width: 28rem;
+            min-height: auto !important;
+            border-radius: 1rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e2e8f0;
+            padding: 2.5rem !important;
+        }
+    }
+
     .linkedin-container {
         width: 100%;
         max-width: 1128px; /* LinkedIn's standard container width */
