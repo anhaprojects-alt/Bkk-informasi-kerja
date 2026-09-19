@@ -92,13 +92,10 @@
     }
 
     /* Tactile 3D Buttons (Modernized) */
-    .btn-3d {
-        @apply relative font-bold transition-all duration-150 border-b-4 active:border-b-0 active:translate-y-[2px] rounded-xl text-center px-6 py-3;
-    }
     .btn-3d-primary {
-        @apply bg-blue-600 text-white border-blue-800 hover:bg-blue-700 btn-3d;
+        @apply relative font-bold transition-all duration-150 border-b-4 active:border-b-0 active:translate-y-[2px] rounded-xl text-center px-6 py-3 bg-blue-600 text-white border-blue-800 hover:bg-blue-700;
     }
     .btn-3d-secondary {
-        @apply bg-white text-slate-700 border-slate-300 hover:bg-slate-50 btn-3d;
+        @apply relative font-bold transition-all duration-150 border-b-4 active:border-b-0 active:translate-y-[2px] rounded-xl text-center px-6 py-3 bg-white text-slate-700 border-slate-300 hover:bg-slate-50;
     }
 }
