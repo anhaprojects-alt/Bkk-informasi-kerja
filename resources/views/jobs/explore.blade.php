@@ -9,11 +9,12 @@
 </head>
 <body class="bg-[#f3f2ef] font-sans antialiased text-slate-800 pwa-optimized"
     x-data="{
-        selectedJobId: null,
-        jobs: {{ $jobs->toJson() }},
+        selectedJobId: {{ $jobs->first() ? $jobs->first()->id : 'null' }},
+        jobsList: {{ json_encode($jobs->items()) }},
         appliedJobIds: {{ json_encode($appliedJobIds) }},
         get selectedJob() {
-            return this.jobs.find(j => j.id === this.selectedJobId);
+            if (!this.selectedJobId) return null;
+            return this.jobsList.find(j => j.id == this.selectedJobId);
         },
         isApplied(id) {
             return this.appliedJobIds.includes(id);
@@ -22,85 +23,84 @@
 
     <div class="applicant-shell">
         <!-- LinkedIn Style Header -->
-    <header class="bg-white border-b border-slate-200 h-14 sticky top-0 z-50 flex items-center shadow-sm">
-        <div class="linkedin-container flex items-center justify-between gap-4">
-            <div class="flex items-center gap-4 flex-1">
-                <a href="{{ route('home') }}"><x-partials.logo size="sm" :withText="false" /></a>
+        <header class="bg-white border-b border-slate-200 h-14 sticky top-0 z-50 flex items-center shadow-sm">
+            <div class="linkedin-container flex items-center justify-between gap-4">
+                <div class="flex items-center gap-4 flex-1">
+                    <a href="{{ route('home') }}"><x-partials.logo size="sm" :withText="false" /></a>
 
-                <form action="{{ route('jobs.index') }}" method="GET" class="hidden lg:flex items-center flex-1 max-w-2xl">
-                    <div class="flex items-center flex-1 bg-[#eef3f8] rounded-md overflow-hidden border border-transparent focus-within:border-blue-600 focus-within:ring-1 focus-within:ring-blue-600 transition-all">
-                        <!-- Job Keyword Input -->
-                        <div class="relative flex-1">
-                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
-                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-                            </span>
-                            <input type="search" name="q" value="{{ $search }}" placeholder="Cari posisi atau perusahaan"
-                                class="bg-transparent border-none py-2 pl-9 pr-4 text-sm w-full focus:ring-0">
+                    <form action="{{ route('jobs.index') }}" method="GET" class="hidden lg:flex items-center flex-1 max-w-2xl">
+                        <div class="flex items-center flex-1 bg-[#eef3f8] rounded-md overflow-hidden border border-transparent focus-within:border-blue-600 focus-within:ring-1 focus-within:ring-blue-600 transition-all">
+                            <!-- Job Keyword Input -->
+                            <div class="relative flex-1">
+                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
+                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                                </span>
+                                <input type="search" name="q" value="{{ $search }}" placeholder="Cari posisi atau perusahaan"
+                                    class="bg-transparent border-none py-2 pl-9 pr-4 text-sm w-full focus:ring-0">
+                            </div>
+
+                            <!-- Divider Line -->
+                            <div class="h-6 w-px bg-slate-300"></div>
+
+                            <!-- Location Input -->
+                            <div class="relative flex-1">
+                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
+                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                                </span>
+                                <input type="text" name="l" value="{{ $location }}" placeholder="Kota atau wilayah"
+                                    class="bg-transparent border-none py-2 pl-9 pr-4 text-sm w-full focus:ring-0">
+                            </div>
+
+                            <button type="submit" class="hidden">Cari</button>
                         </div>
+                    </form>
+                </div>
 
-                        <!-- Divider Line -->
-                        <div class="h-6 w-px bg-slate-300"></div>
-
-                        <!-- Location Input -->
-                        <div class="relative flex-1">
-                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
-                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                            </span>
-                            <input type="text" name="l" value="{{ $location }}" placeholder="Kota atau wilayah"
-                                class="bg-transparent border-none py-2 pl-9 pr-4 text-sm w-full focus:ring-0">
+                <div class="flex items-center gap-4">
+                    @guest
+                        <a href="{{ route('login') }}" class="text-sm font-black text-slate-500 hover:text-blue-600 transition">Sign in</a>
+                        <a href="{{ route('register') }}" class="px-5 py-2 border-2 border-blue-600 text-blue-600 font-black rounded-full hover:bg-blue-50 transition text-sm">Join now</a>
+                    @else
+                        <a href="{{ route('applicant.dashboard') }}" class="flex flex-col items-center text-slate-500 hover:text-slate-900 transition">
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+                            <span class="text-[10px] font-bold mt-0.5">Home</span>
+                        </a>
+                        <div class="h-8 w-px bg-slate-200 mx-2"></div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-[10px] font-black uppercase">
+                                {{ substr(Auth::user()->name, 0, 1) }}
+                            </div>
+                            <span class="hidden sm:block text-xs font-black text-slate-700">{{ Auth::user()->name }}</span>
                         </div>
+                    @endguest
+                </div>
+            </div>
+        </header>
 
-                        <button type="submit" class="hidden">Cari</button>
-                    </div>
+        <!-- Smart Filter Bar (Sub-header) -->
+        <div class="bg-white border-b border-slate-200 sticky top-14 z-40 hidden lg:block shadow-sm">
+            <div class="linkedin-container py-3">
+                <form action="{{ route('jobs.index') }}" method="GET" class="flex items-center gap-3">
+                    <input type="hidden" name="q" value="{{ $search }}">
+                    <input type="hidden" name="l" value="{{ $location }}">
+
+                    <button type="submit" name="remote" value="{{ $remoteOnly ? '0' : '1' }}"
+                        class="px-4 py-1.5 rounded-full border transition-all text-sm font-black flex items-center gap-2 {{ $remoteOnly ? 'bg-emerald-600 border-emerald-700 text-white shadow-md' : 'border-slate-300 text-slate-600 hover:bg-slate-50' }}">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 002 2h1.5a2.5 2.5 0 012.5 2.5V14a2 2 0 002 2h.5m-6-12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        Remote Only
+                    </button>
+
+                    <div class="h-6 w-px bg-slate-200 mx-2"></div>
+
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Live Tracking:</span>
+                    <span class="text-sm font-black text-blue-600 bg-blue-50 px-2 py-1 rounded-lg border border-blue-100">{{ $jobs->total() }} Peluang Aktif</span>
+
+                    <div class="flex-1"></div>
+
+                    <button type="submit" class="px-6 py-2 bg-blue-600 text-white font-black rounded-full shadow-lg shadow-blue-100 hover:bg-blue-700 transition-all text-xs uppercase tracking-widest">Update Search</button>
                 </form>
             </div>
-
-            <div class="flex items-center gap-4">
-                @guest
-                    <a href="{{ route('login') }}" class="text-sm font-black text-slate-500 hover:text-blue-600 transition">Sign in</a>
-                    <a href="{{ route('register') }}" class="px-5 py-2 border-2 border-blue-600 text-blue-600 font-black rounded-full hover:bg-blue-50 transition text-sm">Join now</a>
-                @else
-                    <a href="{{ route('applicant.dashboard') }}" class="flex flex-col items-center text-slate-500 hover:text-slate-900 transition">
-                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
-                        <span class="text-[10px] font-bold mt-0.5">Home</span>
-                    </a>
-                    <div class="h-8 w-px bg-slate-200 mx-2"></div>
-                    <div class="flex items-center gap-2">
-                        <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-[10px] font-black uppercase">
-                            {{ substr(Auth::user()->name, 0, 1) }}
-                        </div>
-                        <span class="hidden sm:block text-xs font-black text-slate-700">{{ Auth::user()->name }}</span>
-                    </div>
-                @endguest
-            </div>
         </div>
-    </header>
-
-    <!-- Smart Filter Bar (Sub-header) -->
-    <div class="bg-white border-b border-slate-200 sticky top-14 z-40 hidden lg:block shadow-sm">
-        <div class="linkedin-container py-3">
-            <form action="{{ route('jobs.index') }}" method="GET" class="flex items-center gap-3">
-                <!-- Keep search values -->
-                <input type="hidden" name="q" value="{{ $search }}">
-                <input type="hidden" name="l" value="{{ $location }}">
-
-                <button type="submit" name="remote" value="{{ $remoteOnly ? '0' : '1' }}"
-                    class="px-4 py-1.5 rounded-full border transition-all text-sm font-black flex items-center gap-2 {{ $remoteOnly ? 'bg-emerald-600 border-emerald-700 text-white shadow-md' : 'border-slate-300 text-slate-600 hover:bg-slate-50' }}">
-                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 002 2h1.5a2.5 2.5 0 012.5 2.5V14a2 2 0 002 2h.5m-6-12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                    Remote Only
-                </button>
-
-                <div class="h-6 w-px bg-slate-200 mx-2"></div>
-
-                <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Live Tracking:</span>
-                <span class="text-sm font-black text-blue-600 bg-blue-50 px-2 py-1 rounded-lg border border-blue-100">{{ $jobs->total() }} Peluang Aktif</span>
-
-                <div class="flex-1"></div>
-
-                <button type="submit" class="px-6 py-2 bg-blue-600 text-white font-black rounded-full shadow-lg shadow-blue-100 hover:bg-blue-700 transition-all text-xs uppercase tracking-widest">Update Search</button>
-            </form>
-        </div>
-    </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-0 lg:border lg:border-slate-200 lg:rounded-xl lg:bg-white lg:overflow-hidden min-h-[calc(100vh-10rem)]">
 
@@ -114,7 +114,7 @@
                     @forelse ($jobs as $job)
                         <div
                             @click="selectedJobId = {{ $job->id }}; if(window.innerWidth < 1024) window.location.href = '/jobs/' + {{ $job->id }}"
-                            :class="selectedJobId === {{ $job->id }} ? 'bg-blue-50/50 border-l-4 border-blue-600' : 'hover:bg-slate-50'"
+                            :class="selectedJobId == {{ $job->id }} ? 'bg-blue-50/50 border-l-4 border-blue-600' : 'hover:bg-slate-50'"
                             class="p-4 cursor-pointer transition-all">
                             <div class="flex gap-3">
                                 <div class="w-12 h-12 bg-white border border-slate-200 rounded flex items-center justify-center shrink-0 shadow-sm">
@@ -139,7 +139,7 @@
                             </div>
                         </div>
                     @empty
-                        <div class="p-12 text-center text-slate-400 font-bold">Belum ada lowongan tersedia.</div>
+                        <div class="p-12 text-center text-slate-400 font-bold text-sm uppercase tracking-widest">Belum ada lowongan tersedia.</div>
                     @endforelse
                 </div>
 
@@ -151,57 +151,94 @@
             </aside>
 
             <!-- RIGHT COLUMN: Job Detail (Desktop Only) -->
-            <main class="hidden lg:flex lg:col-span-7 flex-col overflow-y-auto max-h-[85vh] relative p-8 bg-white">
+            <main class="hidden lg:flex lg:col-span-7 flex-col overflow-y-auto max-h-[85vh] relative bg-white border-l border-slate-200">
                 <template x-if="selectedJob">
-                    <div class="space-y-6 animate-fadeIn">
-                        <div class="flex justify-between items-start">
-                            <div class="flex gap-4">
-                                <div class="w-16 h-16 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center">
-                                    <svg class="h-8 w-8 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+                    <div class="animate-fadeIn">
+                        <!-- Top Banner / Background (LinkedIn Style) -->
+                        <div class="h-32 bg-slate-100/50 relative overflow-hidden">
+                            <div class="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-transparent"></div>
+                        </div>
+
+                        <div class="px-8 pb-12 -mt-12 relative z-10 space-y-8">
+                            <!-- Job Header Info -->
+                            <div class="space-y-6">
+                                <div class="w-24 h-24 bg-white border border-slate-200 rounded-lg shadow-md flex items-center justify-center p-2">
+                                    <svg class="w-full h-full text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
                                 </div>
-                                <div class="min-w-0">
-                                    <h1 class="text-2xl font-black text-slate-900 leading-tight" x-text="selectedJob.title"></h1>
-                                    <p class="text-lg font-bold text-slate-700 mt-1">
+
+                                <div class="space-y-2">
+                                    <h1 class="text-3xl font-black text-slate-900 tracking-tight leading-none" x-text="selectedJob.title"></h1>
+                                    <div class="flex items-center gap-2 text-lg font-bold text-slate-700">
                                         <span x-text="selectedJob.company ? selectedJob.company.name : 'Mitra Terpercaya'"></span>
-                                        • <span x-text="selectedJob.location"></span>
-                                    </p>
-                                    <p class="text-sm text-slate-400 mt-1 font-medium">Diposting <span x-text="new Date(selectedJob.created_at).toLocaleDateString('id-ID', {day:'numeric', month:'long'})"></span></p>
+                                        <span class="text-slate-300">•</span>
+                                        <span x-text="selectedJob.location"></span>
+                                    </div>
+                                    <div class="flex items-center gap-3 text-sm text-slate-500 font-medium">
+                                        <span>Diposting <span x-text="new Date(selectedJob.created_at).toLocaleDateString('id-ID', {day:'numeric', month:'long'})"></span></span>
+                                        <span class="text-slate-300">•</span>
+                                        <span class="text-emerald-600 font-black uppercase tracking-widest text-[10px]">28 Applicants</span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <div class="flex gap-3">
-                            @guest
-                                <a :href="'/login?intended=' + encodeURIComponent('/jobs/' + selectedJobId)"
-                                    class="px-8 py-3 bg-blue-600 text-white font-black rounded-full shadow-lg hover:bg-blue-700 transition-all flex items-center gap-2">
-                                    Sign in to apply <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
-                                </a>
-                            @else
-                                <template x-if="isApplied(selectedJobId)">
-                                    <div class="px-8 py-3 bg-emerald-50 text-emerald-700 font-black rounded-full border border-emerald-100 flex items-center gap-2">
-                                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7" /></svg> Sudah Dilamar
-                                    </div>
-                                </template>
-                                <template x-if="!isApplied(selectedJobId)">
-                                    <a :href="'/applicant/jobs/' + selectedJobId"
-                                        class="px-8 py-3 bg-blue-600 text-white font-black rounded-full shadow-lg hover:bg-blue-700 transition-all flex items-center gap-2">
-                                        Lamar Sekarang <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                            <!-- Action Bar -->
+                            <div class="flex items-center gap-3 py-4 sticky top-0 bg-white/95 backdrop-blur-sm z-20 border-b border-slate-50">
+                                @guest
+                                    <a :href="'/login?intended=' + encodeURIComponent('/jobs/' + selectedJobId)"
+                                        class="px-10 py-3.5 bg-blue-600 text-white font-black rounded-full shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all flex items-center gap-2 text-base">
+                                        Apply <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
                                     </a>
-                                </template>
-                            @endguest
-                            <button class="px-8 py-3 border-2 border-blue-600 text-blue-600 font-black rounded-full hover:bg-blue-50 transition-all">Simpan</button>
-                        </div>
+                                @else
+                                    <template x-if="isApplied(selectedJobId)">
+                                        <div class="px-10 py-3.5 bg-emerald-50 text-emerald-700 font-black rounded-full border border-emerald-100 flex items-center gap-2 text-base">
+                                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7" /></svg> Sudah Dilamar
+                                        </div>
+                                    </template>
+                                    <template x-if="!isApplied(selectedJobId)">
+                                        <a :href="'/applicant/jobs/' + selectedJobId"
+                                            class="px-10 py-3.5 bg-blue-600 text-white font-black rounded-full shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all flex items-center gap-2 text-base">
+                                            Apply <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                                        </a>
+                                    </template>
+                                @endguest
+                                <button class="px-10 py-3.5 border-2 border-blue-600 text-blue-600 font-black rounded-full hover:bg-blue-50 transition-all text-base">Save</button>
+                            </div>
 
-                        <div class="border-t border-slate-100 pt-8 space-y-8">
-                            <section>
-                                <h2 class="text-sm font-black uppercase tracking-widest text-slate-400 mb-4 border-l-4 border-blue-600 pl-3">Deskripsi Pekerjaan</h2>
-                                <p class="text-slate-600 font-medium leading-relaxed whitespace-pre-line text-sm" x-text="selectedJob.description"></p>
-                            </section>
+                            <!-- Premium AI Insight Widget (Simulated like LinkedIn) -->
+                            <div class="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-6 relative overflow-hidden shadow-sm">
+                                <div class="absolute -right-4 top-0 w-24 h-24 bg-amber-200/20 rounded-full blur-2xl"></div>
+                                <div class="flex items-center gap-2 mb-3">
+                                    <span class="bg-amber-400 text-[9px] font-black text-white px-1.5 py-0.5 rounded uppercase tracking-widest">Premium</span>
+                                    <h4 class="text-sm font-black text-slate-800 uppercase tracking-tight">AI Fit Analysis</h4>
+                                </div>
+                                <p class="text-xs text-slate-600 font-medium leading-relaxed mb-6">Analisis cerdas BKK menunjukkan kecocokan kualifikasi Anda sebesar <span class="font-black text-blue-600">85%</span>.</p>
+                                <div class="flex flex-wrap gap-2">
+                                    <button class="px-4 py-2 bg-white border border-slate-200 rounded-full text-[11px] font-black text-slate-700 hover:border-amber-400 transition-colors flex items-center gap-2">
+                                        <span class="w-2 h-2 bg-amber-400 rounded-full animate-pulse"></span>
+                                        Am I a good fit?
+                                    </button>
+                                    <button class="px-4 py-2 bg-white border border-slate-200 rounded-full text-[11px] font-black text-slate-700 hover:border-amber-400 transition-colors">Improve my CV</button>
+                                </div>
+                            </div>
 
-                            <section>
-                                <h2 class="text-sm font-black uppercase tracking-widest text-slate-400 mb-4 border-l-4 border-blue-600 pl-3">Persyaratan</h2>
-                                <p class="text-slate-600 font-medium leading-relaxed whitespace-pre-line text-sm" x-text="selectedJob.requirements"></p>
-                            </section>
+                            <!-- Detailed Sections -->
+                            <div class="space-y-10 pt-4 pb-12">
+                                <section>
+                                    <h2 class="text-xl font-black text-slate-900 mb-4 tracking-tight flex items-center gap-3">
+                                        <span class="w-1.5 h-6 bg-blue-600 rounded-full"></span>
+                                        Deskripsi Pekerjaan
+                                    </h2>
+                                    <p class="text-slate-600 font-medium leading-relaxed whitespace-pre-line text-[15px]" x-text="selectedJob.description"></p>
+                                </section>
+
+                                <section>
+                                    <h2 class="text-xl font-black text-slate-900 mb-4 tracking-tight flex items-center gap-3">
+                                        <span class="w-1.5 h-6 bg-blue-600 rounded-full"></span>
+                                        Kualifikasi Utama
+                                    </h2>
+                                    <p class="text-slate-600 font-medium leading-relaxed whitespace-pre-line text-[15px]" x-text="selectedJob.requirements"></p>
+                                </section>
+                            </div>
                         </div>
                     </div>
                 </template>
@@ -228,8 +265,8 @@
                         </div>
 
                         <div class="max-w-xs space-y-4">
-                            <h2 class="text-3xl font-black text-slate-900 tracking-tight leading-tight group-hover:text-blue-600 transition-colors">Telusuri Karir Impian</h2>
-                            <p class="text-sm text-slate-500 font-medium leading-relaxed">Pilih peluang kerja di panel kiri untuk menganalisis detail kualifikasi dan masa depan profesional Anda.</p>
+                            <h2 class="text-3xl font-black text-slate-900 tracking-tight leading-tight group-hover:text-blue-600 transition-colors uppercase">Temukan Karir</h2>
+                            <p class="text-sm text-slate-500 font-medium leading-relaxed">Pilih salah satu lowongan di sebelah kiri untuk menganalisis detail persyaratan dan masa depan profesional Anda.</p>
                         </div>
 
                         <div class="flex gap-4 items-center text-[11px] font-black uppercase tracking-[0.3em] text-slate-300">
@@ -249,9 +286,8 @@
     @endauth
 
     <style>
-        .animate-fadeIn { animation: fadeIn 0.3s ease-in-out; }
+        .animate-fadeIn { animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
-    </div>
 </body>
 </html>
