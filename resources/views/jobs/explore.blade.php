@@ -9,7 +9,7 @@
 </head>
 <body class="bg-[#f3f2ef] font-sans antialiased text-slate-800 pwa-optimized"
     x-data="{
-        selectedJobId: {{ $jobs->first() ? $jobs->first()->id : 'null' }},
+        selectedJobId: null,
         jobs: {{ $jobs->toJson() }},
         appliedJobIds: {{ json_encode($appliedJobIds) }},
         get selectedJob() {
@@ -209,30 +209,33 @@
                 <!-- COOL EMPTY STATE WITH INTERACTIVE LOGO -->
                 <template x-if="!selectedJobId">
                     <div class="h-full flex flex-col items-center justify-center p-12 text-center space-y-8 animate-fadeIn bg-gradient-to-b from-white to-slate-50/50">
-                        <div class="relative group cursor-pointer">
+                        <div class="relative group cursor-pointer" @click="selectedJobId = {{ $jobs->first() ? $jobs->first()->id : 'null' }}">
                             <!-- Floating Glow Effect -->
-                            <div class="absolute inset-0 bg-blue-400/20 rounded-full blur-3xl group-hover:bg-blue-500/30 transition-all duration-700 scale-150"></div>
+                            <div class="absolute inset-0 bg-blue-400/20 rounded-full blur-3xl group-hover:bg-blue-600/40 transition-all duration-700 scale-150 group-hover:scale-[2]"></div>
 
                             <!-- Large Interactive 3D Logo -->
-                            <div class="relative transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 ease-out">
+                            <div class="relative transform group-hover:scale-110 group-hover:-rotate-3 group-hover:-translate-y-4 transition-all duration-500 ease-out">
                                 <x-partials.logo size="xl" :withText="false" />
 
-                                <!-- Decorative Floating Element -->
-                                <div class="absolute -top-4 -right-4 w-8 h-8 bg-amber-400 rounded-lg shadow-lg flex items-center justify-center text-white animate-bounce group-hover:animate-none">
-                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
+                                <!-- Decorative Floating Badges -->
+                                <div class="absolute -top-4 -right-4 w-10 h-10 bg-amber-400 rounded-2xl shadow-xl flex items-center justify-center text-white animate-bounce group-hover:animate-none group-hover:scale-125 transition-transform">
+                                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
+                                </div>
+                                <div class="absolute -bottom-2 -left-6 w-8 h-8 bg-blue-600 rounded-xl shadow-lg flex items-center justify-center text-white animate-pulse group-hover:scale-110 transition-transform">
+                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="max-w-xs space-y-3">
-                            <h2 class="text-2xl font-black text-slate-900 tracking-tight leading-tight">Mulai Langkah Karir Profesional Anda</h2>
-                            <p class="text-sm text-slate-500 font-medium leading-relaxed">Pilih salah satu lowongan di sebelah kiri untuk melihat detail, persyaratan, dan melakukan pendaftaran secara instan.</p>
+                        <div class="max-w-xs space-y-4">
+                            <h2 class="text-3xl font-black text-slate-900 tracking-tight leading-tight group-hover:text-blue-600 transition-colors">Telusuri Karir Impian</h2>
+                            <p class="text-sm text-slate-500 font-medium leading-relaxed">Pilih peluang kerja di panel kiri untuk menganalisis detail kualifikasi dan masa depan profesional Anda.</p>
                         </div>
 
-                        <div class="flex gap-2 items-center text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
-                            <span class="w-8 h-px bg-slate-200"></span>
-                            <span>Powered by BKK Intelligence</span>
-                            <span class="w-8 h-px bg-slate-200"></span>
+                        <div class="flex gap-4 items-center text-[11px] font-black uppercase tracking-[0.3em] text-slate-300">
+                            <span class="w-12 h-px bg-slate-200"></span>
+                            <span class="animate-pulse">BKK Intel Dashboard</span>
+                            <span class="w-12 h-px bg-slate-200"></span>
                         </div>
                     </div>
                 </template>
