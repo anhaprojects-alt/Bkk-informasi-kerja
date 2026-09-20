@@ -9,6 +9,7 @@ use App\Models\Message;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
@@ -122,7 +123,7 @@ class DashboardController extends Controller
         $user->phone_number = $data['phone_number'];
         $user->role = $data['role'];
 
-        if (!empty($data['password'])) {
+        if (! empty($data['password'])) {
             $user->password = Hash::make($data['password']);
         }
 
@@ -183,49 +184,82 @@ class DashboardController extends Controller
         $user->province = $data['province'] ?? $user->province;
         $user->city = $data['city'] ?? $user->city;
 
-        if (!empty($data['password'])) {
+        if (! empty($data['password'])) {
             $user->password = Hash::make($data['password']);
         }
 
-        // Handle File Uploads
-        if ($request->hasFile('avatar')) {
-            $oldPath = $user->avatar_path;
-            $user->avatar_path = $request->file('avatar')->store('profiles/avatars', 'public');
-            if ($oldPath && $oldPath !== $user->avatar_path && Storage::disk('public')->exists($oldPath)) {
-                Storage::disk('public')->delete($oldPath);
+        // 2. Handle File Uploads with Smart Rollback & Database Sync
+        $oldAvatarPath = $user->avatar_path;
+        $oldBannerPath = $user->banner_path;
+        $oldCvPath = $user->cv_path;
+
+        try {
+            DB::beginTransaction();
+
+            if ($request->hasFile('avatar')) {
+                $user->avatar_path = $request->file('avatar')->store('profiles/avatars', 'public');
             }
-        }
 
-        if ($request->hasFile('banner')) {
-            $oldPath = $user->banner_path;
-            $user->banner_path = $request->file('banner')->store('profiles/banners', 'public');
-            if ($oldPath && $oldPath !== $user->banner_path && Storage::disk('public')->exists($oldPath)) {
-                Storage::disk('public')->delete($oldPath);
+            if ($request->hasFile('banner')) {
+                $user->banner_path = $request->file('banner')->store('profiles/banners', 'public');
             }
-        }
 
-        if ($user->role === 'applicant' && $request->hasFile('cv')) {
-            $oldPath = $user->cv_path;
-            $user->cv_path = $request->file('cv')->store('profiles/cvs', 'public');
-            $user->cv_name = $request->file('cv')->getClientOriginalName();
-            if ($oldPath && $oldPath !== $user->cv_path && Storage::disk('public')->exists($oldPath)) {
-                Storage::disk('public')->delete($oldPath);
+            if ($user->role === 'applicant' && $request->hasFile('cv')) {
+                $user->cv_path = $request->file('cv')->store('profiles/cvs', 'public');
+                $user->cv_name = $request->file('cv')->getClientOriginalName();
             }
-        }
 
-        $user->save();
+            if (! empty($data['password'])) {
+                $user->password = Hash::make($data['password']);
+            }
 
-        if ($user->role === 'company') {
-            Company::updateOrCreate(
-                ['user_id' => $user->id],
-                [
-                    'name' => $data['company_name'] ?? $user->name,
-                    'description' => $data['company_description'] ?? null,
-                    'address' => $data['company_address'] ?? null,
-                    'website' => $data['company_website'] ?? null,
-                    'logo' => $user->avatar_path,
-                ]
-            );
+            $user->save();
+
+            if ($user->role === 'company') {
+                Company::updateOrCreate(
+                    ['user_id' => $user->id],
+                    [
+                        'name' => $data['company_name'] ?? $user->name,
+                        'description' => $data['company_description'] ?? null,
+                        'address' => $data['company_address'] ?? null,
+                        'website' => $data['company_website'] ?? null,
+                        'logo' => $user->avatar_path,
+                    ]
+                );
+            }
+
+            DB::commit();
+
+            // 3. Post-Success Cleanup (Delete old files only after DB is committed)
+            if ($request->hasFile('avatar') && $oldAvatarPath && $oldAvatarPath !== $user->avatar_path) {
+                Storage::disk('public')->delete($oldAvatarPath);
+            }
+            if ($request->hasFile('banner') && $oldBannerPath && $oldBannerPath !== $user->banner_path) {
+                Storage::disk('public')->delete($oldBannerPath);
+            }
+            if ($user->role === 'applicant' && $request->hasFile('cv') && $oldCvPath && $oldCvPath !== $user->cv_path) {
+                Storage::disk('public')->delete($oldCvPath);
+            }
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            // System Intelligence: Delete the new files if DB save failed to prevent orphaned files
+            if ($request->hasFile('avatar')) {
+                Storage::disk('public')->delete($user->avatar_path);
+            }
+            if ($request->hasFile('banner')) {
+                Storage::disk('public')->delete($user->banner_path);
+            }
+            if ($user->role === 'applicant' && $request->hasFile('cv')) {
+                Storage::disk('public')->delete($user->cv_path);
+            }
+
+            error_log('Profile Update Error: '.$e->getMessage());
+
+            return back()->withInput()->withErrors([
+                'avatar' => 'Sistem mendeteksi adanya gangguan saat menyimpan data. Perubahan dibatalkan demi keamanan data Anda. Silakan coba lagi.',
+            ]);
         }
 
         return redirect()->route('settings.profile')->with('status', 'Profil berhasil diperbarui.');
