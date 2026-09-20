@@ -55,7 +55,12 @@ class DashboardController extends Controller
             $recentUsers = User::latest()->take(5)->get();
             $recentJobs = JobListing::with('company')->latest()->take(5)->get();
 
-            return view('admin.dashboard', compact('stats', 'recentUsers', 'recentJobs'));
+            return view('admin.dashboard', [
+                'stats' => $stats,
+                'recentUsers' => $recentUsers,
+                'recentJobs' => $recentJobs,
+                'jobs' => collect(), // Empty collection for consistency
+            ]);
         }
 
         // Company specific statistics
@@ -64,6 +69,7 @@ class DashboardController extends Controller
             'openJobs' => (clone $this->scopedJobs())->where('status', 'open')->count(),
             'totalApplications' => Applicant::whereIn('job_listing_id', $jobIds)->count(),
             'hiredCount' => Applicant::whereIn('job_listing_id', $jobIds)->where('status', 'accepted')->count(),
+            'totalCompanies' => 1, // For the map widget text
         ];
 
         $jobs = $this->scopedJobs()
@@ -72,7 +78,12 @@ class DashboardController extends Controller
             ->take(10)
             ->get();
 
-        return view('admin.dashboard', compact('stats', 'jobs'));
+        return view('admin.dashboard', [
+            'stats' => $stats,
+            'jobs' => $jobs,
+            'recentUsers' => collect(), // Empty collection for consistency
+            'recentJobs' => collect(), // Empty collection for consistency
+        ]);
     }
 
     /**
