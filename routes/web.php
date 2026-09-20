@@ -49,6 +49,10 @@ Route::middleware('auth')->group(function () {
     Route::delete('/admin/jobs/{jobListing}', [DashboardController::class, 'destroyJob'])->name('jobs.destroy');
     Route::patch('/admin/jobs/{jobListing}/close', [DashboardController::class, 'closeJob'])->name('jobs.close');
 
+    // Applicant Management (Company/Admin)
+    Route::get('/admin/jobs/{jobListing}/applicants', [DashboardController::class, 'jobApplicants'])->name('jobs.applicants');
+    Route::patch('/admin/applicants/{applicant}/status', [DashboardController::class, 'updateApplicantStatus'])->name('applicants.status.update');
+
     // Profile Settings (Universal)
     Route::get('/settings/profile', [DashboardController::class, 'profile'])->name('settings.profile');
     Route::put('/settings/profile', [DashboardController::class, 'profileUpdate'])->name('settings.profile.update');

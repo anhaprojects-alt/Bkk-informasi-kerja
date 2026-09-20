@@ -208,8 +208,30 @@ class DashboardController extends Controller
 
     public function messagesIndex(?User $user = null)
     {
-        $participants = User::where('id', '!=', Auth::id())
+        $currentUser = Auth::user();
+
+        // Get users who have exchanged messages with current user OR are potential contacts
+        // For simplicity in this professional LinkedIn flow, we show active conversations first
+        $recentParticipantsIds = Message::where('sender_id', $currentUser->id)
+            ->orWhere('receiver_id', $currentUser->id)
+            ->latest()
+            ->pluck('sender_id', 'receiver_id')
+            ->flatten()
+            ->unique()
+            ->filter(fn ($id) => $id != $currentUser->id);
+
+        $participants = User::whereIn('id', $recentParticipantsIds)
+            ->orWhere(function ($query) use ($currentUser) {
+                // Applicants see Companies, Companies see Applicants/Admins
+                if ($currentUser->role === 'applicant') {
+                    $query->where('role', 'company');
+                } else {
+                    $query->where('role', '!=', 'company');
+                }
+            })
+            ->where('id', '!=', $currentUser->id)
             ->orderBy('name')
+            ->limit(20)
             ->get();
 
         $activeUser = $user ?? $participants->first();
@@ -385,5 +407,38 @@ class DashboardController extends Controller
         return redirect()
             ->route('dashboard')
             ->with('status', 'Lowongan kerja telah ditutup.');
+    }
+
+    public function jobApplicants(JobListing $jobListing)
+    {
+        $this->ensureStaff();
+
+        if (Auth::user()->role !== 'admin') {
+            abort_unless(optional(Auth::user()->company)->id === $jobListing->company_id, 403);
+        }
+
+        $applicants = Applicant::where('job_listing_id', $jobListing->id)
+            ->with('user')
+            ->latest()
+            ->paginate(20);
+
+        return view('admin.jobs.applicants', compact('jobListing', 'applicants'));
+    }
+
+    public function updateApplicantStatus(Request $request, Applicant $applicant)
+    {
+        $this->ensureStaff();
+
+        if (Auth::user()->role !== 'admin') {
+            abort_unless(optional(Auth::user()->company)->id === $applicant->jobListing->company_id, 403);
+        }
+
+        $data = $request->validate([
+            'status' => ['required', 'in:pending,accepted,rejected'],
+        ]);
+
+        $applicant->update(['status' => $data['status']]);
+
+        return back()->with('status', 'Status pelamar berhasil diperbarui.');
     }
 }

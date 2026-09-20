@@ -148,7 +148,10 @@
                                                 <p class="text-[10px] font-bold text-slate-400 uppercase">{{ $u->role }}</p>
                                             </div>
                                         </div>
-                                        <span class="text-[10px] font-bold text-slate-300 uppercase tracking-tighter">{{ $u->created_at->diffForHumans() }}</span>
+                                        <div class="flex items-center gap-4">
+                                            <span class="text-[10px] font-bold text-slate-300 uppercase tracking-tighter">{{ $u->created_at->diffForHumans() }}</span>
+                                            <a href="{{ route('admin.users.edit', $u) }}" class="text-blue-600 hover:text-blue-800"><svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg></a>
+                                        </div>
                                     </div>
                                 @endforeach
                             </div>
@@ -156,14 +159,17 @@
 
                         <!-- Global Recent Jobs -->
                         <div class="glass-card">
-                            <div class="p-5 border-b border-slate-100 bg-slate-50/50">
+                            <div class="p-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
                                 <h4 class="font-black text-slate-800 text-sm tracking-tight uppercase">Aktivitas Lowongan Terbaru</h4>
                             </div>
                             <div class="divide-y divide-slate-100">
                                 @foreach($recentJobs as $j)
-                                    <div class="p-4">
-                                        <p class="text-sm font-black text-slate-900 leading-tight">{{ $j->title }}</p>
-                                        <p class="text-[10px] font-bold text-blue-600 uppercase mt-1">{{ $j->company->name ?? '-' }}</p>
+                                    <div class="p-4 flex items-center justify-between">
+                                        <div>
+                                            <p class="text-sm font-black text-slate-900 leading-tight">{{ $j->title }}</p>
+                                            <p class="text-[10px] font-bold text-blue-600 uppercase mt-1">{{ $j->company->name ?? '-' }}</p>
+                                        </div>
+                                        <a href="{{ route('jobs.edit', $j) }}" class="text-slate-400 hover:text-blue-600 transition"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg></a>
                                     </div>
                                 @endforeach
                             </div>
@@ -204,9 +210,11 @@
                                 <tbody class="divide-y divide-slate-100 text-xs font-bold text-slate-700">
                                     @forelse($jobs as $job)
                                         <tr>
-                                            <td class="p-4 font-black text-slate-900">{{ $job->title }}</td>
+                                            <td class="p-4">
+                                                <a href="{{ route('jobs.applicants', $job) }}" class="font-black text-slate-900 hover:text-blue-600 transition underline decoration-dotted">{{ $job->title }}</a>
+                                            </td>
                                             <td class="p-4 text-center">
-                                                <span class="bg-blue-50 text-blue-700 px-2 py-1 rounded-lg">{{ $job->applicants_count }}</span>
+                                                <a href="{{ route('jobs.applicants', $job) }}" class="bg-blue-50 text-blue-700 px-2 py-1 rounded-lg hover:bg-blue-600 hover:text-white transition">{{ $job->applicants_count }}</a>
                                             </td>
                                             <td class="p-4">
                                                 <span class="px-2 py-0.5 rounded-lg border {{ $job->status === 'open' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-slate-100 text-slate-400' }}">

@@ -68,10 +68,10 @@ class AuthController extends Controller
             'firebase_token' => 'required',
         ]);
 
-        $apiKey = config('services.firebase.api_key');
+        $apiKey = config('firebase.api_key') ?? config('services.firebase.api_key');
 
         if (empty($apiKey)) {
-            return back()->withErrors(['firebase_token' => 'Konfigurasi Firebase belum diaktifkan.']);
+            return back()->withErrors(['firebase_token' => 'Konfigurasi Firebase (API Key) belum ditemukan di .env.']);
         }
 
         $firebaseResponse = Http::post('https://identitytoolkit.googleapis.com/v1/accounts:lookup?key='.$apiKey, [

@@ -218,6 +218,16 @@
                                     </template>
                                 @endguest
                                 <button class="px-10 py-3.5 border-2 border-blue-600 text-blue-600 font-black rounded-full hover:bg-blue-50 transition-all text-base">Save</button>
+
+                                @auth
+                                    <template x-if="selectedJob && selectedJob.company && selectedJob.company.user_id">
+                                        <a :href="'/messages/' + selectedJob.company.user_id"
+                                            class="p-3.5 border-2 border-slate-200 text-slate-500 rounded-full hover:bg-slate-50 hover:text-blue-600 transition-all shadow-sm"
+                                            title="Kirim Pesan ke Perusahaan">
+                                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+                                        </a>
+                                    </template>
+                                @endauth
                             </div>
 
                             <!-- Detailed Sections -->
