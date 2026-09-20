@@ -49,27 +49,42 @@ class DatabaseSeeder extends Seeder
         $companySeed = [
             [
                 'user' => ['name' => 'HRD Maju Sejahtera', 'email' => 'hrd@majusejahtera.test', 'phone' => '081200000001'],
-                'company' => ['name' => 'PT Maju Mundur Sejahtera', 'address' => 'Jl. Jendral Sudirman No. 12, Jakarta Selatan', 'website' => 'https://majusejahtera.test'],
+                'company' => [
+                    'name' => 'PT Maju Mundur Sejahtera',
+                    'address' => 'Gedung Artha Graha, Jakarta Selatan',
+                    'website' => 'https://majusejahtera.test',
+                    'bio' => 'Pemimpin industri manufaktur dengan jangkauan global.'
+                ],
                 'jobs' => [
                     ['title' => 'Senior Laravel Backend Developer', 'location' => 'Jakarta Selatan', 'salary' => 'Rp 12.000.000 - Rp 18.000.000', 'status' => 'open'],
-                    ['title' => 'QA Engineer', 'location' => 'Jakarta Selatan', 'salary' => 'Rp 8.000.000 - Rp 11.000.000', 'status' => 'open'],
-                    ['title' => 'Product Manager', 'location' => 'Jakarta Barat', 'salary' => 'Rp 15.000.000 - Rp 25.000.000', 'status' => 'open'],
+                    ['title' => 'QA Engineer Specialist', 'location' => 'Jakarta Selatan', 'salary' => 'Rp 8.000.000 - Rp 11.000.000', 'status' => 'open'],
+                    ['title' => 'Product Manager IT', 'location' => 'Jakarta Barat', 'salary' => 'Rp 15.000.000 - Rp 25.000.000', 'status' => 'open'],
                 ],
             ],
             [
                 'user' => ['name' => 'Rekrutmen Tech Media', 'email' => 'career@techmedia.test', 'phone' => '081200000002'],
-                'company' => ['name' => 'Tech Media Solusindo', 'address' => 'Jl. Setiabudi No. 45, Bandung', 'website' => 'https://techmedia.test'],
+                'company' => [
+                    'name' => 'Tech Media Solusindo',
+                    'address' => 'Dago, Bandung, Jawa Barat',
+                    'website' => 'https://techmedia.test',
+                    'bio' => 'Agensi kreatif digital yang berfokus pada UI/UX dan Mobile App.'
+                ],
                 'jobs' => [
                     ['title' => 'Mobile UI/UX Designer', 'location' => 'Bandung', 'salary' => 'Rp 9.000.000 - Rp 14.000.000', 'status' => 'open'],
                     ['title' => 'Front-end Developer (React)', 'location' => 'Remote', 'salary' => 'Rp 10.000.000 - Rp 16.000.000', 'status' => 'open'],
-                    ['title' => 'Flutter Developer', 'location' => 'Remote', 'salary' => 'Rp 10.000.000 - Rp 15.000.000', 'status' => 'pending'],
+                    ['title' => 'Flutter Developer', 'location' => 'Remote', 'salary' => 'Rp 10.000.000 - Rp 15.000.000', 'status' => 'open'],
                 ],
             ],
             [
                 'user' => ['name' => 'Talent Acquisition Nusantara', 'email' => 'talent@nusantara.test', 'phone' => '081200000003'],
-                'company' => ['name' => 'Nusantara Creative Agency', 'address' => 'Jl. Malioboro No. 1, Yogyakarta', 'website' => 'https://nusantara.test'],
+                'company' => [
+                    'name' => 'Nusantara Creative Agency',
+                    'address' => 'Jl. Malioboro No. 1, Yogyakarta',
+                    'website' => 'https://nusantara.test',
+                    'bio' => 'Pusat kreatifitas anak muda di jantung Yogyakarta.'
+                ],
                 'jobs' => [
-                    ['title' => 'Graphic Designer', 'location' => 'Yogyakarta', 'salary' => 'Rp 5.000.000 - Rp 8.000.000', 'status' => 'open'],
+                    ['title' => 'Senior Graphic Designer', 'location' => 'Yogyakarta', 'salary' => 'Rp 5.000.000 - Rp 8.000.000', 'status' => 'open'],
                     ['title' => 'Social Media Specialist', 'location' => 'Surabaya', 'salary' => 'Rp 6.000.000 - Rp 9.000.000', 'status' => 'open'],
                 ],
             ],
@@ -92,7 +107,7 @@ class DatabaseSeeder extends Seeder
                 ['user_id' => $companyUser->id],
                 [
                     'name' => $seed['company']['name'],
-                    'description' => 'Perusahaan mitra Bursa Kerja Khusus yang berfokus pada inovasi dan pertumbuhan karir alumni.',
+                    'description' => $seed['company']['bio'] ?? 'Perusahaan mitra Bursa Kerja Khusus.',
                     'address' => $seed['company']['address'],
                     'website' => $seed['company']['website'],
                 ]
@@ -111,6 +126,7 @@ class DatabaseSeeder extends Seeder
                 );
             }
         }
+
 
         // Applicant accounts.
         $applicantOne = User::updateOrCreate(

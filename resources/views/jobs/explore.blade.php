@@ -114,18 +114,18 @@
                         <form action="{{ route('jobs.index') }}" method="GET" id="filterForm" class="space-y-6">
                             <input type="hidden" name="q" value="{{ $search }}">
 
-                            <div class="space-y-4">
-                                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Provinsi & Kota Terpopuler</p>
+                                <div class="space-y-4">
+                                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Wilayah di Indonesia</p>
                                 <div class="space-y-2 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
                                     @php
-                                        $commonLocations = ['Jakarta', 'Bandung', 'Surabaya', 'Semarang', 'Medan', 'Makassar', 'Yogyakarta', 'Remote'];
+                                        $commonLocations = ['Jakarta', 'Bandung', 'Surabaya', 'Semarang', 'Medan', 'Makassar', 'Yogyakarta'];
                                         $allLocations = collect($availableLocations)->merge($commonLocations)->unique()->sort();
                                     @endphp
                                     @foreach($allLocations as $loc)
                                         <label class="flex items-center gap-3 cursor-pointer group">
                                             <div class="relative flex items-center">
                                                 <input type="checkbox" name="cities[]" value="{{ $loc }}"
-                                                    {{ in_array($loc, $cities) || in_array($loc, $provinces) ? 'checked' : '' }}
+                                                    {{ in_array($loc, $cities ?? []) ? 'checked' : '' }}
                                                     onchange="this.form.submit()"
                                                     class="peer h-5 w-5 appearance-none rounded border-2 border-slate-200 checked:bg-blue-600 checked:border-blue-600 transition-all cursor-pointer">
                                                 <svg class="absolute h-3.5 w-3.5 text-white opacity-0 peer-checked:opacity-100 left-0.5 pointer-events-none transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="4"><path d="M5 13l4 4L19 7" /></svg>
