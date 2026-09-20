@@ -16,7 +16,7 @@ RUN apk add --no-cache \
     curl \
     libpng-dev \
     libjpeg-turbo-dev \
-    webp-dev \
+    libwebp-dev \
     freetype-dev \
     libxml2-dev \
     postgresql-dev \
