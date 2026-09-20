@@ -147,7 +147,7 @@ class ProfileAndMessagingTest extends TestCase
                 'phone_number' => $companyUser->phone_number,
                 'cv' => UploadedFile::fake()->create('company-cv.pdf', 100, 'application/pdf'),
             ])
-            ->assertRedirect('/settings/profile');
+            ->assertSessionHasErrors('cv');
 
         $companyUser->refresh();
 

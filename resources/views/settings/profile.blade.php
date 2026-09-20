@@ -176,7 +176,7 @@
                                         <svg class="h-6 w-6 text-red-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
                                         <span class="text-xs font-bold text-slate-700 truncate">{{ $user->cv_name }}</span>
                                     </div>
-                                    <a href="{{ Storage::url($user->cv_path) }}" target="_blank" class="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline shrink-0">Download</a>
+                                    <a href="{{ Storage::disk('public')->url($user->cv_path) }}" target="_blank" class="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline shrink-0">Download</a>
                                 </div>
 
                                 <!-- Intelligent Smart Preview -->
@@ -184,7 +184,7 @@
                                     <div class="absolute inset-0 flex items-center justify-center text-slate-500 opacity-20 group-hover:opacity-10 transition-opacity pointer-events-none">
                                         <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 20 20"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" /></svg>
                                     </div>
-                                    <iframe src="{{ Storage::url($user->cv_path) }}" class="w-full h-full border-none relative z-10" loading="lazy"></iframe>
+                                    <iframe src="{{ Storage::disk('public')->url($user->cv_path) }}" class="w-full h-full border-none relative z-10" loading="lazy"></iframe>
                                 </div>
                             </div>
                         @else

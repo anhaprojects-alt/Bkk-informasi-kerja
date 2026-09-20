@@ -189,6 +189,9 @@ class DashboardController extends Controller
                 'cv.mimes' => 'CV hanya boleh berformat PDF, DOC, atau DOCX.',
                 'cv.max' => 'CV maksimal berukuran 5 MB.',
             ];
+        } else {
+            $rules['cv'] = ['prohibited'];
+            $messages['cv.prohibited'] = 'Upload CV hanya tersedia untuk akun pelamar.';
         }
 
         $data = $request->validate($rules, $messages);
@@ -235,7 +238,7 @@ class DashboardController extends Controller
                 Storage::disk('public')->delete($user->cv_path);
             }
 
-            $user->cv_path = $request->file('cv')->store('profiles/cv', 'public');
+            $user->cv_path = $request->file('cv')->storePublicly('profiles/cv', 'public');
             $user->cv_name = $request->file('cv')->getClientOriginalName();
         }
 
