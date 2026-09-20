@@ -155,7 +155,7 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
 
-        $rules = [
+        $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,'.$user->id],
             'phone_number' => ['required', 'string', 'max:20', 'unique:users,phone_number,'.$user->id],
@@ -169,95 +169,66 @@ class DashboardController extends Controller
             'company_address' => ['nullable', 'string', 'max:500'],
             'company_website' => ['nullable', 'url:http,https', 'max:255'],
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
-            'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:8192'],
-            'banner' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:8192'],
-        ];
+            'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:10240'],
+            'banner' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:10240'],
+            'cv' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
+        ]);
 
-        $messages = [
-            'avatar.image' => 'Foto profil harus berupa file gambar yang valid.',
-            'avatar.mimes' => 'Foto profil hanya boleh berformat JPG, JPEG, PNG, atau WEBP.',
-            'avatar.max' => 'Foto profil maksimal berukuran 8 MB.',
-            'banner.image' => 'Banner harus berupa file gambar yang valid.',
-            'banner.mimes' => 'Banner hanya boleh berformat JPG, JPEG, PNG, atau WEBP.',
-            'banner.max' => 'Banner maksimal berukuran 8 MB.',
-        ];
-
-        if ($user->role === 'applicant') {
-            $rules['cv'] = ['nullable', 'file', 'mimes:pdf,doc,docx', 'max:5120'];
-            $messages += [
-                'cv.file' => 'CV harus berupa file yang valid.',
-                'cv.mimes' => 'CV hanya boleh berformat PDF, DOC, atau DOCX.',
-                'cv.max' => 'CV maksimal berukuran 5 MB.',
-            ];
-        } else {
-            $rules['cv'] = ['prohibited'];
-            $messages['cv.prohibited'] = 'Upload CV hanya tersedia untuk akun pelamar.';
-        }
-
-        $data = $request->validate($rules, $messages);
-
-        // 1. Update User Basic Info
         $user->name = $data['name'];
         $user->email = $data['email'];
         $user->phone_number = $data['phone_number'];
-        $user->headline = $data['headline'] ?? null;
-        $user->bio = $data['bio'] ?? null;
-        $user->location = $data['location'] ?? null;
-        $user->province = $data['province'] ?? null;
-        $user->city = $data['city'] ?? null;
-
-        // 2. Handle File Uploads
-        $oldAvatarPath = $user->avatar_path;
-        $oldBannerPath = $user->banner_path;
-
-        if ($request->hasFile('avatar')) {
-            $user->avatar_path = $request->file('avatar')->store('profiles/avatars', 'public');
-
-            // Clean up old avatar
-            if ($oldAvatarPath && $oldAvatarPath !== $user->avatar_path && Storage::disk('public')->exists($oldAvatarPath)) {
-                Storage::disk('public')->delete($oldAvatarPath);
-            }
-        }
-
-        if ($request->hasFile('banner')) {
-            $user->banner_path = $request->file('banner')->store('profiles/banners', 'public');
-
-            // Clean up old banner
-            if ($oldBannerPath && $oldBannerPath !== $user->banner_path && Storage::disk('public')->exists($oldBannerPath)) {
-                Storage::disk('public')->delete($oldBannerPath);
-            }
-        }
-
-        if ($user->role === 'applicant' && $request->hasFile('cv')) {
-            if ($user->cv_path && Storage::disk('public')->exists($user->cv_path)) {
-                Storage::disk('public')->delete($user->cv_path);
-            }
-
-            $user->cv_path = $request->file('cv')->store('profiles/cv', 'public');
-            $user->cv_name = $request->file('cv')->getClientOriginalName();
-        }
+        $user->headline = $data['headline'] ?? $user->headline;
+        $user->bio = $data['bio'] ?? $user->bio;
+        $user->location = $data['location'] ?? $user->location;
+        $user->province = $data['province'] ?? $user->province;
+        $user->city = $data['city'] ?? $user->city;
 
         if (!empty($data['password'])) {
             $user->password = Hash::make($data['password']);
         }
 
+        // Handle File Uploads
+        if ($request->hasFile('avatar')) {
+            $oldPath = $user->avatar_path;
+            $user->avatar_path = $request->file('avatar')->store('profiles/avatars', 'public');
+            if ($oldPath && $oldPath !== $user->avatar_path && Storage::disk('public')->exists($oldPath)) {
+                Storage::disk('public')->delete($oldPath);
+            }
+        }
+
+        if ($request->hasFile('banner')) {
+            $oldPath = $user->banner_path;
+            $user->banner_path = $request->file('banner')->store('profiles/banners', 'public');
+            if ($oldPath && $oldPath !== $user->banner_path && Storage::disk('public')->exists($oldPath)) {
+                Storage::disk('public')->delete($oldPath);
+            }
+        }
+
+        if ($user->role === 'applicant' && $request->hasFile('cv')) {
+            $oldPath = $user->cv_path;
+            $user->cv_path = $request->file('cv')->store('profiles/cvs', 'public');
+            $user->cv_name = $request->file('cv')->getClientOriginalName();
+            if ($oldPath && $oldPath !== $user->cv_path && Storage::disk('public')->exists($oldPath)) {
+                Storage::disk('public')->delete($oldPath);
+            }
+        }
+
         $user->save();
 
-        // 3. Sync Company Data
         if ($user->role === 'company') {
-            $user->company()->updateOrCreate(
+            Company::updateOrCreate(
                 ['user_id' => $user->id],
                 [
                     'name' => $data['company_name'] ?? $user->name,
                     'description' => $data['company_description'] ?? null,
                     'address' => $data['company_address'] ?? null,
                     'website' => $data['company_website'] ?? null,
-                    'logo' => $user->avatar_path, // Synchronize company logo with user avatar
-                ],
+                    'logo' => $user->avatar_path,
+                ]
             );
         }
 
-        return redirect()->route('settings.profile')->with('status', 'Profil Anda berhasil diperbarui.');
+        return redirect()->route('settings.profile')->with('status', 'Profil berhasil diperbarui.');
     }
 
     public function helpCenter()

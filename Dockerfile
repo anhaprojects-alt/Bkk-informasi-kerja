@@ -15,14 +15,19 @@ RUN apk add --no-cache \
     gettext \
     curl \
     libpng-dev \
+    libjpeg-turbo-dev \
+    webp-dev \
+    freetype-dev \
     libxml2-dev \
     postgresql-dev \
     zip \
     unzip \
     git
 
-RUN docker-php-ext-install pdo pdo_mysql pdo_pgsql bcmath gd
-RUN printf "upload_max_filesize=8M\npost_max_size=20M\n" > /usr/local/etc/php/conf.d/uploads.ini
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
+    && docker-php-ext-install pdo pdo_mysql pdo_pgsql bcmath gd
+
+RUN printf "upload_max_filesize=32M\npost_max_size=64M\nmemory_limit=256M\n" > /usr/local/etc/php/conf.d/uploads.ini
 
 WORKDIR /var/www/html
 
