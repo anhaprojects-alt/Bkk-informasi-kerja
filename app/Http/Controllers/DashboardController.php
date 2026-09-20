@@ -217,20 +217,19 @@ class DashboardController extends Controller
             );
         }
 
-        if ($request->hasFile('avatar')) {
-            if ($user->avatar_path && Storage::disk('public')->exists($user->avatar_path)) {
-                Storage::disk('public')->delete($user->avatar_path);
-            }
+        $oldAvatarPath = $user->avatar_path;
+        $oldBannerPath = $user->banner_path;
+        $newAvatarPath = null;
+        $newBannerPath = null;
 
-            $user->avatar_path = $request->file('avatar')->storePublicly('profiles/avatars', 'public');
+        if ($request->hasFile('avatar')) {
+            $newAvatarPath = $request->file('avatar')->storePublicly('profiles/avatars', 'public');
+            $user->avatar_path = $newAvatarPath;
         }
 
         if ($request->hasFile('banner')) {
-            if ($user->banner_path && Storage::disk('public')->exists($user->banner_path)) {
-                Storage::disk('public')->delete($user->banner_path);
-            }
-
-            $user->banner_path = $request->file('banner')->storePublicly('profiles/banners', 'public');
+            $newBannerPath = $request->file('banner')->storePublicly('profiles/banners', 'public');
+            $user->banner_path = $newBannerPath;
         }
 
         if ($user->role === 'applicant' && $request->hasFile('cv')) {
@@ -247,6 +246,14 @@ class DashboardController extends Controller
         }
 
         $user->save();
+
+        if ($newAvatarPath && $oldAvatarPath && $oldAvatarPath !== $newAvatarPath && Storage::disk('public')->exists($oldAvatarPath)) {
+            Storage::disk('public')->delete($oldAvatarPath);
+        }
+
+        if ($newBannerPath && $oldBannerPath && $oldBannerPath !== $newBannerPath && Storage::disk('public')->exists($oldBannerPath)) {
+            Storage::disk('public')->delete($oldBannerPath);
+        }
 
         return redirect()->route('settings.profile')->with('status', 'Profil Anda berhasil diperbarui.');
     }

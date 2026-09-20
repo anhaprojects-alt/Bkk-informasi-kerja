@@ -131,6 +131,40 @@ class ProfileAndMessagingTest extends TestCase
         Storage::disk('public')->assertExists($user->banner_path);
     }
 
+    public function test_invalid_avatar_and_banner_are_rejected_without_replacing_existing_files(): void
+    {
+        Storage::fake('public');
+
+        $user = User::factory()->create([
+            'role' => 'applicant',
+            'phone_number' => '081234567897',
+            'avatar_path' => 'profiles/avatars/existing-avatar.jpg',
+            'banner_path' => 'profiles/banners/existing-banner.jpg',
+        ]);
+
+        Storage::disk('public')->put($user->avatar_path, 'existing avatar');
+        Storage::disk('public')->put($user->banner_path, 'existing banner');
+
+        $this->actingAs($user)
+            ->from('/settings/profile')
+            ->put('/settings/profile', [
+                'name' => $user->name,
+                'email' => $user->email,
+                'phone_number' => $user->phone_number,
+                'avatar' => UploadedFile::fake()->create('avatar.exe', 100, 'application/octet-stream'),
+                'banner' => UploadedFile::fake()->create('banner.txt', 100, 'text/plain'),
+            ])
+            ->assertRedirect('/settings/profile')
+            ->assertSessionHasErrors(['avatar', 'banner']);
+
+        $user->refresh();
+
+        $this->assertSame('profiles/avatars/existing-avatar.jpg', $user->avatar_path);
+        $this->assertSame('profiles/banners/existing-banner.jpg', $user->banner_path);
+        Storage::disk('public')->assertExists($user->avatar_path);
+        Storage::disk('public')->assertExists($user->banner_path);
+    }
+
     public function test_company_profile_does_not_accept_cv_uploads(): void
     {
         Storage::fake('public');

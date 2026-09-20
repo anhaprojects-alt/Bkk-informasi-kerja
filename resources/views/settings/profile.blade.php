@@ -27,29 +27,41 @@
             @endif
 
             <div class="glass-card p-8 bg-white">
-                <form method="POST" action="{{ route('settings.profile.update') }}" enctype="multipart/form-data" class="space-y-6" x-data="{ busy: false }" @submit="busy = true">
+                <form method="POST" action="{{ route('settings.profile.update') }}" enctype="multipart/form-data" class="space-y-6" x-data="{ busy: false, uploadErrors: { avatar: '', banner: '' } }" @submit="if (Object.values(uploadErrors).some(Boolean)) { $event.preventDefault(); return; } busy = true">
                     @csrf @method('PUT')
 
-                    <div class="flex items-center gap-5 pb-6 border-b border-slate-100">
-                        <div class="relative">
-                            <img src="{{ $user->avatar_url }}" alt="Avatar" class="w-20 h-20 rounded-full object-cover border-4 border-white shadow-md">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 pb-6 border-b border-slate-100">
+                        <div class="rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 to-white p-4 shadow-sm">
+                            <div class="flex items-center gap-4">
+                                <div class="relative h-20 w-20 shrink-0 overflow-hidden rounded-full border-4 border-white bg-slate-100 shadow-md">
+                                    <img x-ref="avatarPreview" src="{{ $user->avatar_url }}" alt="Pratinjau foto profil" class="h-full w-full object-cover">
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="text-[10px] font-black uppercase tracking-widest text-blue-700">Foto Profil</p>
+                                    <p class="mt-1 text-xs font-bold text-slate-700">Logo atau foto yang terlihat di profil.</p>
+                                </div>
+                            </div>
+                            <input type="file" name="avatar" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                                @change="const file = $event.target.files[0]; uploadErrors.avatar = ''; if (!file) { return; } if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) { uploadErrors.avatar = 'Foto profil gagal dipilih: gunakan JPG, JPEG, PNG, atau WEBP.'; $event.target.value = ''; return; } if (file.size > 8388608) { uploadErrors.avatar = 'Foto profil gagal dipilih: ukuran file melebihi batas 8 MB.'; $event.target.value = ''; return; } $refs.avatarPreview.src = URL.createObjectURL(file)"
+                                class="mt-4 block w-full text-xs text-slate-500 file:mr-3 file:rounded-full file:border-0 file:bg-blue-600 file:px-4 file:py-2 file:font-black file:text-white hover:file:bg-blue-700">
+                            <p class="mt-2 text-[10px] leading-relaxed text-slate-500">JPG, JPEG, PNG, WEBP · maksimal 8 MB.</p>
+                            <p x-show="uploadErrors.avatar" x-text="uploadErrors.avatar" role="alert" class="mt-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-[10px] font-bold leading-relaxed text-red-700"></p>
+                            @error('avatar') <p role="alert" class="mt-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-[10px] font-bold leading-relaxed text-red-700">{{ $message }}</p> @enderror
                         </div>
-                        <div>
-                            <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Foto Profil</p>
-                            <input type="file" name="avatar" accept="image/*" class="mt-2 block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-blue-50 file:text-blue-700 file:font-black">
-                            <p class="mt-2 text-[10px] font-medium leading-relaxed text-slate-500">Catatan: gunakan JPG, JPEG, PNG, atau WEBP dengan ukuran maksimal 8 MB.</p>
-                            @error('avatar') <p class="text-[10px] font-bold text-red-600 mt-1">{{ $message }}</p> @enderror
-                        </div>
-                    </div>
 
-                    <div class="space-y-2">
-                        <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400">Banner Latar</label>
-                        <div class="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
-                            <img src="{{ $user->banner_url }}" alt="Banner" class="h-32 w-full object-cover">
+                        <div class="rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50 to-white p-4 shadow-sm">
+                            <div class="overflow-hidden rounded-xl border-2 border-white bg-slate-100 shadow-sm">
+                                <img x-ref="bannerPreview" src="{{ $user->banner_url }}" alt="Pratinjau banner profil" class="h-28 w-full object-cover">
+                            </div>
+                            <p class="mt-3 text-[10px] font-black uppercase tracking-widest text-indigo-700">Banner Profil</p>
+                            <p class="mt-1 text-xs font-bold text-slate-700">Gunakan gambar lebar agar tampilan header tetap rapi.</p>
+                            <input type="file" name="banner" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                                @change="uploadErrors.banner = ''; const file = $event.target.files[0]; if (!file) { return; } if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) { uploadErrors.banner = 'Banner gagal dipilih: gunakan JPG, JPEG, PNG, atau WEBP.'; $event.target.value = ''; return; } if (file.size > 8388608) { uploadErrors.banner = 'Banner gagal dipilih: ukuran file melebihi batas 8 MB.'; $event.target.value = ''; return; } $refs.bannerPreview.src = URL.createObjectURL(file)"
+                                class="mt-4 block w-full text-xs text-slate-500 file:mr-3 file:rounded-full file:border-0 file:bg-indigo-600 file:px-4 file:py-2 file:font-black file:text-white hover:file:bg-indigo-700">
+                            <p class="mt-2 text-[10px] leading-relaxed text-slate-500">JPG, JPEG, PNG, WEBP · maksimal 8 MB.</p>
+                            <p x-show="uploadErrors.banner" x-text="uploadErrors.banner" role="alert" class="mt-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-[10px] font-bold leading-relaxed text-red-700"></p>
+                            @error('banner') <p role="alert" class="mt-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-[10px] font-bold leading-relaxed text-red-700">{{ $message }}</p> @enderror
                         </div>
-                        <input type="file" name="banner" accept="image/*" class="mt-2 block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-slate-100 file:text-slate-700 file:font-black">
-                        <p class="text-[10px] font-medium leading-relaxed text-slate-500">Catatan: gunakan JPG, JPEG, PNG, atau WEBP dengan ukuran maksimal 8 MB.</p>
-                        @error('banner') <p class="text-[10px] font-bold text-red-600 mt-1">{{ $message }}</p> @enderror
                     </div>
 
                     <div class="space-y-1">

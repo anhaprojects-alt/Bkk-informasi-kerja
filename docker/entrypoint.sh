@@ -17,7 +17,9 @@ chown -R www-data:www-data storage bootstrap/cache
 
 # Run migrations only at runtime, never while building the image.
 php artisan migrate --force
-php artisan storage:link --force >/dev/null 2>&1 || true
+php artisan storage:link --force
+test -L public/storage
+test -d storage/app/public
 php artisan optimize:clear
 php artisan config:cache
 php artisan route:cache

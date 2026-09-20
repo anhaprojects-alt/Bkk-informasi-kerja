@@ -40,6 +40,7 @@ COPY docker/entrypoint.sh /usr/local/bin/railway-entrypoint
 COPY docker/supervisord.conf /etc/supervisord.conf
 RUN chmod +x /usr/local/bin/railway-entrypoint \
     && mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views bootstrap/cache \
+    && mkdir -p storage/app/public/profiles/avatars storage/app/public/profiles/banners \
     && chown -R www-data:www-data storage bootstrap/cache \
     && rm -f /etc/nginx/http.d/default.conf
 
