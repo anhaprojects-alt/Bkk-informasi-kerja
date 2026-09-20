@@ -61,10 +61,14 @@ class JobController extends Controller
     {
         $search = trim((string) $request->query('q', ''));
         $location = trim((string) $request->query('l', ''));
+        $provinces = $request->query('provinces', []);
+        $cities = $request->query('cities', []);
         $remoteOnly = $request->boolean('remote');
 
         $query = JobListing::query()
-            ->with('company')
+            ->with(['company' => function($q) {
+                $q->select('id', 'user_id', 'name', 'logo', 'address');
+            }])
             ->where('status', 'open');
 
         if ($search !== '') {
@@ -73,31 +77,30 @@ class JobController extends Controller
 
             $query->where(function ($q) use ($search, $searchTerms) {
                 $q->where('title', 'like', "%{$search}%")
-                    ->orWhere('location', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%")
                     ->orWhereHas('company', fn ($c) => $c->where('name', 'like', "%{$search}%"));
 
                 foreach ($searchTerms as $term) {
                     $q->orWhere('title', 'like', "%{$term}%")
-                        ->orWhere('location', 'like', "%{$term}%")
                         ->orWhereHas('company', fn ($c) => $c->where('name', 'like', "%{$term}%"));
                 }
             });
         }
 
         if ($location !== '') {
-            $locationTerms = preg_split('/[\s,\/\-]+/', strtolower($location), -1, PREG_SPLIT_NO_EMPTY) ?: [strtolower($location)];
-
-            $query->where(function ($q) use ($location, $locationTerms) {
-                $q->where('location', 'like', "%{$location}%");
-
-                foreach ($locationTerms as $term) {
-                    if ($term === '') {
-                        continue;
-                    }
-
-                    $q->orWhere('location', 'like', "%{$term}%");
-                }
+            $query->where(function ($q) use ($location) {
+                $q->where('location', 'like', "%{$location}%")
+                    ->orWhereHas('company', fn ($c) => $c->where('address', 'like', "%{$location}%"));
             });
+        }
+
+        // Checklist filters for Indonesian Regions
+        if (!empty($provinces)) {
+            $query->whereIn('location', $provinces);
+        }
+
+        if (!empty($cities)) {
+            $query->whereIn('location', $cities);
         }
 
         if ($remoteOnly) {
@@ -112,7 +115,10 @@ class JobController extends Controller
         $jobs = $query->latest()->paginate(15)->withQueryString();
         $appliedJobIds = Auth::check() ? Applicant::where('user_id', Auth::id())->pluck('job_listing_id')->all() : [];
 
-        return view('jobs.explore', compact('jobs', 'search', 'location', 'remoteOnly', 'appliedJobIds'));
+        // Meta data for filters
+        $availableLocations = JobListing::where('status', 'open')->select('location')->distinct()->pluck('location')->all();
+
+        return view('jobs.explore', compact('jobs', 'search', 'location', 'provinces', 'cities', 'remoteOnly', 'appliedJobIds', 'availableLocations'));
     }
 
     /**

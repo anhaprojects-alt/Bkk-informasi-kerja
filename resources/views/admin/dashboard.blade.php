@@ -129,52 +129,76 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        <!-- Recent Users -->
-                        <div class="glass-card">
-                            <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                                <h4 class="font-black text-slate-800 text-sm tracking-tight uppercase">User Baru Terdaftar</h4>
-                                <a href="{{ route('admin.users.index') }}" class="text-[10px] font-black text-blue-600 uppercase tracking-widest">Semua</a>
+                    <!-- Recent Activity & Maps Overview -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div class="lg:col-span-2 space-y-8">
+                             <!-- Recent Users -->
+                            <div class="glass-card">
+                                <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                                    <h4 class="font-black text-slate-800 text-sm tracking-tight uppercase">User Baru Terdaftar</h4>
+                                    <a href="{{ route('admin.users.index') }}" class="text-[10px] font-black text-blue-600 uppercase tracking-widest">Semua</a>
+                                </div>
+                                <div class="divide-y divide-slate-100">
+                                    @foreach($recentUsers as $u)
+                                        <div class="p-4 flex items-center justify-between">
+                                            <div class="flex items-center gap-3">
+                                                <img src="{{ $u->avatar_url }}" class="w-10 h-10 rounded-full border border-slate-100">
+                                                <div>
+                                                    <p class="text-sm font-black text-slate-900">{{ $u->name }}</p>
+                                                    <p class="text-[10px] font-bold text-slate-400 uppercase">{{ $u->role }}</p>
+                                                </div>
+                                            </div>
+                                            <div class="flex items-center gap-4">
+                                                <span class="text-[10px] font-bold text-slate-300 uppercase tracking-tighter">{{ $u->created_at->diffForHumans() }}</span>
+                                                <a href="{{ route('admin.users.edit', $u) }}" class="text-blue-600 hover:text-blue-800"><svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg></a>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
                             </div>
-                            <div class="divide-y divide-slate-100">
-                                @foreach($recentUsers as $u)
-                                    <div class="p-4 flex items-center justify-between">
-                                        <div class="flex items-center gap-3">
-                                            <div class="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-400">
-                                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-                                            </div>
+
+                             <!-- Global Recent Jobs -->
+                            <div class="glass-card">
+                                <div class="p-5 border-b border-slate-100 bg-slate-50/50">
+                                    <h4 class="font-black text-slate-800 text-sm tracking-tight uppercase">Aktivitas Lowongan Terbaru</h4>
+                                </div>
+                                <div class="divide-y divide-slate-100">
+                                    @foreach($recentJobs as $j)
+                                        <div class="p-4 flex items-center justify-between">
                                             <div>
-                                                <p class="text-sm font-black text-slate-900">{{ $u->name }}</p>
-                                                <p class="text-[10px] font-bold text-slate-400 uppercase">{{ $u->role }}</p>
+                                                <p class="text-sm font-black text-slate-900 leading-tight">{{ $j->title }}</p>
+                                                <p class="text-[10px] font-bold text-blue-600 uppercase mt-1">{{ $j->company->name ?? '-' }}</p>
                                             </div>
+                                            <a href="{{ route('jobs.edit', $j) }}" class="text-slate-400 hover:text-blue-600 transition"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg></a>
                                         </div>
-                                        <div class="flex items-center gap-4">
-                                            <span class="text-[10px] font-bold text-slate-300 uppercase tracking-tighter">{{ $u->created_at->diffForHumans() }}</span>
-                                            <a href="{{ route('admin.users.edit', $u) }}" class="text-blue-600 hover:text-blue-800"><svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg></a>
-                                        </div>
-                                    </div>
-                                @endforeach
+                                    @endforeach
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Global Recent Jobs -->
-                        <div class="glass-card">
-                            <div class="p-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
-                                <h4 class="font-black text-slate-800 text-sm tracking-tight uppercase">Aktivitas Lowongan Terbaru</h4>
+                        <!-- Smart Maps Overview -->
+                        <div class="glass-card bg-white p-1 overflow-hidden flex flex-col h-full border-b-4 border-indigo-600">
+                            <div class="p-5">
+                                <h4 class="font-black text-slate-800 text-sm tracking-tight uppercase flex items-center gap-2">
+                                    <svg class="h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /></svg>
+                                    Sebaran Mitra Indonesia
+                                </h4>
+                                <p class="text-[10px] text-slate-400 font-medium mt-1 uppercase tracking-widest">Pantauan wilayah operasional</p>
                             </div>
-                            <div class="divide-y divide-slate-100">
-                                @foreach($recentJobs as $j)
-                                    <div class="p-4 flex items-center justify-between">
-                                        <div>
-                                            <p class="text-sm font-black text-slate-900 leading-tight">{{ $j->title }}</p>
-                                            <p class="text-[10px] font-bold text-blue-600 uppercase mt-1">{{ $j->company->name ?? '-' }}</p>
-                                        </div>
-                                        <a href="{{ route('jobs.edit', $j) }}" class="text-slate-400 hover:text-blue-600 transition"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg></a>
-                                    </div>
-                                @endforeach
+                            <div class="flex-1 min-h-[400px] bg-slate-100 relative group">
+                                <iframe
+                                    class="w-full h-full grayscale-[40%] contrast-[1.1] group-hover:grayscale-0 transition-all duration-[1.5s]"
+                                    frameborder="0" scrolling="no"
+                                    src="https://maps.google.com/maps?q=Indonesia&t=&z=5&ie=UTF8&iwloc=&output=embed">
+                                </iframe>
+                                <div class="absolute inset-0 pointer-events-none border-4 border-white rounded-2xl"></div>
+                            </div>
+                            <div class="p-5 bg-slate-50 border-t border-slate-100 text-center">
+                                <p class="text-[10px] font-black uppercase text-slate-500 tracking-widest leading-relaxed">Peta mendeteksi <span class="text-blue-600">{{ $stats['totalCompanies'] }} Mitra</span> aktif.</p>
                             </div>
                         </div>
                     </div>
+
 
                 @else
                     <!-- COMPANY VIEW -->
