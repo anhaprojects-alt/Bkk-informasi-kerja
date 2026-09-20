@@ -122,7 +122,7 @@ class DashboardController extends Controller
         $user->phone_number = $data['phone_number'];
         $user->role = $data['role'];
 
-        if ($request->filled('password')) {
+        if (!empty($data['password'])) {
             $user->password = Hash::make($data['password']);
         }
 
@@ -196,6 +196,7 @@ class DashboardController extends Controller
 
         $data = $request->validate($rules, $messages);
 
+        // 1. Update User Basic Info
         $user->name = $data['name'];
         $user->email = $data['email'];
         $user->phone_number = $data['phone_number'];
@@ -205,31 +206,26 @@ class DashboardController extends Controller
         $user->province = $data['province'] ?? null;
         $user->city = $data['city'] ?? null;
 
-        if ($user->role === 'company') {
-            $user->company()->updateOrCreate(
-                [],
-                [
-                    'name' => $data['company_name'] ?? $user->name,
-                    'description' => $data['company_description'] ?? null,
-                    'address' => $data['company_address'] ?? null,
-                    'website' => $data['company_website'] ?? null,
-                ],
-            );
-        }
-
+        // 2. Handle File Uploads
         $oldAvatarPath = $user->avatar_path;
         $oldBannerPath = $user->banner_path;
-        $newAvatarPath = null;
-        $newBannerPath = null;
 
         if ($request->hasFile('avatar')) {
-            $newAvatarPath = $request->file('avatar')->storePublicly('profiles/avatars', 'public');
-            $user->avatar_path = $newAvatarPath;
+            $user->avatar_path = $request->file('avatar')->store('profiles/avatars', 'public');
+
+            // Clean up old avatar
+            if ($oldAvatarPath && $oldAvatarPath !== $user->avatar_path && Storage::disk('public')->exists($oldAvatarPath)) {
+                Storage::disk('public')->delete($oldAvatarPath);
+            }
         }
 
         if ($request->hasFile('banner')) {
-            $newBannerPath = $request->file('banner')->storePublicly('profiles/banners', 'public');
-            $user->banner_path = $newBannerPath;
+            $user->banner_path = $request->file('banner')->store('profiles/banners', 'public');
+
+            // Clean up old banner
+            if ($oldBannerPath && $oldBannerPath !== $user->banner_path && Storage::disk('public')->exists($oldBannerPath)) {
+                Storage::disk('public')->delete($oldBannerPath);
+            }
         }
 
         if ($user->role === 'applicant' && $request->hasFile('cv')) {
@@ -237,22 +233,28 @@ class DashboardController extends Controller
                 Storage::disk('public')->delete($user->cv_path);
             }
 
-            $user->cv_path = $request->file('cv')->storePublicly('profiles/cv', 'public');
+            $user->cv_path = $request->file('cv')->store('profiles/cv', 'public');
             $user->cv_name = $request->file('cv')->getClientOriginalName();
         }
 
-        if ($request->filled('password')) {
+        if (!empty($data['password'])) {
             $user->password = Hash::make($data['password']);
         }
 
         $user->save();
 
-        if ($newAvatarPath && $oldAvatarPath && $oldAvatarPath !== $newAvatarPath && Storage::disk('public')->exists($oldAvatarPath)) {
-            Storage::disk('public')->delete($oldAvatarPath);
-        }
-
-        if ($newBannerPath && $oldBannerPath && $oldBannerPath !== $newBannerPath && Storage::disk('public')->exists($oldBannerPath)) {
-            Storage::disk('public')->delete($oldBannerPath);
+        // 3. Sync Company Data
+        if ($user->role === 'company') {
+            $user->company()->updateOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'name' => $data['company_name'] ?? $user->name,
+                    'description' => $data['company_description'] ?? null,
+                    'address' => $data['company_address'] ?? null,
+                    'website' => $data['company_website'] ?? null,
+                    'logo' => $user->avatar_path, // Synchronize company logo with user avatar
+                ],
+            );
         }
 
         return redirect()->route('settings.profile')->with('status', 'Profil Anda berhasil diperbarui.');
@@ -382,7 +384,7 @@ class DashboardController extends Controller
         $this->ensureStaff();
 
         if (Auth::user()->role !== 'admin') {
-            abort_unless(optional(Auth::user()->company)->id === $jobListing->company_id, 403);
+            abort_unless(optional($user->company)->id === $jobListing->company_id, 403);
         }
 
         $companies = Auth::user()->role === 'admin'
@@ -397,7 +399,7 @@ class DashboardController extends Controller
         $this->ensureStaff();
 
         if (Auth::user()->role !== 'admin') {
-            abort_unless(optional(Auth::user()->company)->id === $jobListing->company_id, 403);
+            abort_unless(optional($user->company)->id === $jobListing->company_id, 403);
         }
 
         $rules = [
@@ -440,7 +442,7 @@ class DashboardController extends Controller
         $this->ensureStaff();
 
         if (Auth::user()->role !== 'admin') {
-            abort_unless(optional(Auth::user()->company)->id === $jobListing->company_id, 403);
+            abort_unless(optional($user->company)->id === $jobListing->company_id, 403);
         }
 
         $jobListing->delete();
@@ -471,7 +473,7 @@ class DashboardController extends Controller
         $this->ensureStaff();
 
         if (Auth::user()->role !== 'admin') {
-            abort_unless(optional(Auth::user()->company)->id === $jobListing->company_id, 403);
+            abort_unless(optional($user->company)->id === $jobListing->company_id, 403);
         }
 
         $applicants = Applicant::where('job_listing_id', $jobListing->id)
@@ -487,7 +489,7 @@ class DashboardController extends Controller
         $this->ensureStaff();
 
         if (Auth::user()->role !== 'admin') {
-            abort_unless(optional(Auth::user()->company)->id === $applicant->jobListing->company_id, 403);
+            abort_unless(optional($user->company)->id === $applicant->jobListing->company_id, 403);
         }
 
         $data = $request->validate([
