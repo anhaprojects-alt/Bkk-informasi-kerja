@@ -66,9 +66,37 @@
                         Partner Recruitment Dashboard
                     @endif
                 </h2>
-                <div class="flex items-center gap-3">
-                    <div class="bg-slate-100 py-1.5 px-4 rounded-full border border-slate-200">
-                        <span class="text-xs font-black text-slate-600 uppercase tracking-widest">{{ Auth::user()->name }}</span>
+
+                <div class="flex items-center gap-4">
+                    <!-- Profile Dropdown (Me) -->
+                    <div class="relative" x-data="{ open: false }">
+                        <button @click="open = !open" class="flex items-center gap-3 bg-slate-50 border border-slate-200 py-1.5 px-4 rounded-xl hover:bg-white transition focus:outline-none group">
+                            <div class="flex flex-col items-end leading-tight hidden sm:flex">
+                                <span class="text-xs font-black text-slate-900">{{ Auth::user()->name }}</span>
+                                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">{{ Auth::user()->role }}</span>
+                            </div>
+                            <img src="{{ Auth::user()->avatar_url }}" alt="Me" class="w-8 h-8 rounded-full border-2 border-white shadow-sm">
+                        </button>
+
+                        <div x-show="open" @click.away="open = false" x-cloak class="absolute right-0 mt-3 w-64 bg-white border border-slate-200 rounded-xl shadow-xl z-[100] py-2 overflow-hidden animate-fadeIn">
+                            <div class="px-4 py-3 flex gap-3 border-b border-slate-100 text-left">
+                                <img src="{{ Auth::user()->avatar_url }}" class="w-12 h-12 rounded-full border border-slate-100">
+                                <div class="min-w-0">
+                                    <p class="text-sm font-black text-slate-900 truncate">{{ Auth::user()->name }}</p>
+                                    <p class="text-[10px] text-slate-500 font-medium truncate tracking-tight">{{ Auth::user()->role }} Account</p>
+                                </div>
+                            </div>
+                            <div class="py-1">
+                                <a href="{{ route('settings.profile') }}" class="block px-4 py-2 text-xs font-black text-blue-600 hover:bg-slate-50 text-left">Pengaturan Profil</a>
+                                <a href="{{ route('help.center') }}" class="block px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 text-left">Pusat Bantuan</a>
+                            </div>
+                            <div class="border-t border-slate-100 py-1">
+                                <form method="POST" action="{{ route('logout') }}">
+                                    @csrf
+                                    <button type="submit" class="w-full text-left px-4 py-2 text-xs font-bold text-slate-500 hover:bg-red-50 hover:text-red-600 transition-colors">Keluar Panel</button>
+                                </form>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </header>
@@ -185,15 +213,18 @@
                                                     {{ strtoupper($job->status) }}
                                                 </span>
                                             </td>
-                                            <td class="p-4 text-center">
+                                            <td class="p-4 text-center space-x-2">
+                                                <a href="{{ route('jobs.edit', $job) }}" class="text-blue-600 hover:text-blue-800 uppercase text-[9px] font-black tracking-widest">Edit</a>
                                                 @if($job->status === 'open')
-                                                    <form method="POST" action="{{ route('jobs.close', $job) }}">
+                                                    <form method="POST" action="{{ route('jobs.close', $job) }}" class="inline-block">
                                                         @csrf @method('PATCH')
-                                                        <button class="text-red-500 hover:underline uppercase text-[9px] font-black tracking-widest">Tutup</button>
+                                                        <button class="text-amber-600 hover:underline uppercase text-[9px] font-black tracking-widest">Tutup</button>
                                                     </form>
-                                                @else
-                                                    -
                                                 @endif
+                                                <form method="POST" action="{{ route('jobs.destroy', $job) }}" class="inline-block" onsubmit="return confirm('Hapus lowongan ini?')">
+                                                    @csrf @method('DELETE')
+                                                    <button class="text-red-500 hover:text-red-700 uppercase text-[9px] font-black tracking-widest">Delete</button>
+                                                </form>
                                             </td>
                                         </tr>
                                     @empty

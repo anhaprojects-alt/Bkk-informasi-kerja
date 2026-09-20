@@ -38,10 +38,15 @@ Route::middleware('auth')->group(function () {
 
     // User Management (Admin Only)
     Route::get('/admin/users', [DashboardController::class, 'usersIndex'])->name('admin.users.index');
+    Route::get('/admin/users/{user}/edit', [DashboardController::class, 'userEdit'])->name('admin.users.edit');
+    Route::put('/admin/users/{user}', [DashboardController::class, 'userUpdate'])->name('admin.users.update');
     Route::delete('/admin/users/{user}', [DashboardController::class, 'userDestroy'])->name('admin.users.destroy');
 
     Route::get('/admin/jobs/create', [DashboardController::class, 'createJob'])->name('jobs.create');
     Route::post('/admin/jobs', [DashboardController::class, 'storeJob'])->name('jobs.store');
+    Route::get('/admin/jobs/{jobListing}/edit', [DashboardController::class, 'editJob'])->name('jobs.edit');
+    Route::put('/admin/jobs/{jobListing}', [DashboardController::class, 'updateJob'])->name('jobs.update');
+    Route::delete('/admin/jobs/{jobListing}', [DashboardController::class, 'destroyJob'])->name('jobs.destroy');
     Route::patch('/admin/jobs/{jobListing}/close', [DashboardController::class, 'closeJob'])->name('jobs.close');
 
     // Profile Settings (Universal)

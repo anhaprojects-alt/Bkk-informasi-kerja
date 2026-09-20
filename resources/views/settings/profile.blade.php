@@ -104,13 +104,36 @@
                         </div>
                     </div>
 
-                    <div class="space-y-2 border border-dashed border-slate-200 rounded-2xl p-4 bg-slate-50/40">
-                        <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400">Unggah CV / Resume</label>
-                        <input type="file" name="cv" accept=".pdf,.doc,.docx" class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-indigo-50 file:text-indigo-700 file:font-black">
+                    <div class="space-y-4 border border-dashed border-slate-200 rounded-2xl p-6 bg-slate-50/40">
+                        <div class="flex items-center justify-between">
+                            <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400">Curriculum Vitae (CV)</label>
+                            @if ($user->cv_path)
+                                <span class="text-[10px] font-black uppercase text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">Sudah Terunggah</span>
+                            @endif
+                        </div>
+
+                        <input type="file" name="cv" accept=".pdf" class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-indigo-50 file:text-indigo-700 file:font-black">
+
                         @if ($user->cv_path)
-                            <a href="{{ Storage::url($user->cv_path) }}" target="_blank" class="inline-flex items-center text-xs font-black text-blue-600 hover:underline">
-                                Lihat CV saat ini: {{ $user->cv_name ?? 'CV.pdf' }}
-                            </a>
+                            <div class="mt-4 space-y-3">
+                                <div class="flex items-center justify-between bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
+                                    <div class="flex items-center gap-3 min-w-0">
+                                        <svg class="h-6 w-6 text-red-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                                        <span class="text-xs font-bold text-slate-700 truncate">{{ $user->cv_name }}</span>
+                                    </div>
+                                    <a href="{{ Storage::url($user->cv_path) }}" target="_blank" class="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline shrink-0">Download</a>
+                                </div>
+
+                                <!-- Intelligent Smart Preview -->
+                                <div class="rounded-xl overflow-hidden border border-slate-200 bg-slate-800 shadow-inner group relative h-[400px]">
+                                    <div class="absolute inset-0 flex items-center justify-center text-slate-500 opacity-20 group-hover:opacity-10 transition-opacity pointer-events-none">
+                                        <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 20 20"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" /></svg>
+                                    </div>
+                                    <iframe src="{{ Storage::url($user->cv_path) }}" class="w-full h-full border-none relative z-10" loading="lazy"></iframe>
+                                </div>
+                            </div>
+                        @else
+                            <p class="text-[10px] text-slate-400 font-medium italic">Unggah file PDF CV Anda untuk memudahkan HRD dalam meninjau profil Anda.</p>
                         @endif
                         @error('cv') <p class="text-[10px] font-bold text-red-600 mt-1">{{ $message }}</p> @enderror
                     </div>

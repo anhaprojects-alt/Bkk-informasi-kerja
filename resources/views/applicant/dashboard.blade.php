@@ -27,9 +27,32 @@
                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
                     <span class="relative inline-flex rounded-full h-3 w-3 bg-blue-600"></span>
                 </span>
-                <div class="hidden sm:flex flex-col items-end leading-none">
-                    <p class="text-xs font-black text-slate-800">{{ Auth::user()->name }}</p>
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Profil Premium</p>
+
+                <!-- Profile Dropdown (LinkedIn Style "Me") -->
+                <div class="relative" x-data="{ open: false }">
+                    <button @click="open = !open" class="flex flex-col items-center leading-none focus:outline-none group">
+                        <img src="{{ Auth::user()->avatar_url }}" alt="Me" class="w-6 h-6 rounded-full border border-slate-200 group-hover:border-blue-600">
+                        <span class="text-[10px] font-bold text-slate-400 mt-0.5 group-hover:text-blue-600 flex items-center gap-0.5">Me <svg class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M19 9l-7 7-7-7" /></svg></span>
+                    </button>
+
+                    <div x-show="open" @click.away="open = false" x-cloak class="absolute right-0 mt-3 w-64 bg-white border border-slate-200 rounded-xl shadow-xl z-[100] py-2 overflow-hidden animate-fadeIn">
+                        <div class="px-4 py-3 flex gap-3 border-b border-slate-100">
+                            <img src="{{ Auth::user()->avatar_url }}" class="w-12 h-12 rounded-full border border-slate-100">
+                            <div class="min-w-0">
+                                <p class="text-sm font-black text-slate-900 truncate">{{ Auth::user()->name }}</p>
+                                <p class="text-[10px] text-slate-500 font-medium truncate leading-tight">{{ Auth::user()->headline ?? 'Alumni Professional' }}</p>
+                            </div>
+                        </div>
+                        <div class="py-1">
+                            <a href="{{ route('settings.profile') }}" class="block px-4 py-2 text-xs font-black text-blue-600 hover:bg-slate-50">Lihat Profil & Pengaturan</a>
+                        </div>
+                        <div class="border-t border-slate-100 py-1">
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="w-full text-left px-4 py-2 text-xs font-bold text-slate-500 hover:bg-red-50 hover:text-red-600 transition-colors">Keluar Akun</button>
+                            </form>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

@@ -86,6 +86,39 @@ class DashboardController extends Controller
         return view('admin.users.index', compact('users'));
     }
 
+    public function userEdit(User $user)
+    {
+        abort_unless(Auth::user()->role === 'admin', 403);
+
+        return view('admin.users.edit', compact('user'));
+    }
+
+    public function userUpdate(Request $request, User $user)
+    {
+        abort_unless(Auth::user()->role === 'admin', 403);
+
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,'.$user->id],
+            'phone_number' => ['required', 'string', 'max:20', 'unique:users,phone_number,'.$user->id],
+            'role' => ['required', 'in:admin,company,applicant'],
+            'password' => ['nullable', 'string', 'min:8'],
+        ]);
+
+        $user->name = $data['name'];
+        $user->email = $data['email'];
+        $user->phone_number = $data['phone_number'];
+        $user->role = $data['role'];
+
+        if ($request->filled('password')) {
+            $user->password = Hash::make($data['password']);
+        }
+
+        $user->save();
+
+        return redirect()->route('admin.users.index')->with('status', 'Data pengguna berhasil diperbarui.');
+    }
+
     public function userDestroy(User $user)
     {
         abort_unless(Auth::user()->role === 'admin', 403);
@@ -263,6 +296,79 @@ class DashboardController extends Controller
         return redirect()
             ->route('dashboard')
             ->with('status', 'Lowongan kerja berhasil ditambahkan.');
+    }
+
+    public function editJob(JobListing $jobListing)
+    {
+        $this->ensureStaff();
+
+        if (Auth::user()->role !== 'admin') {
+            abort_unless(optional(Auth::user()->company)->id === $jobListing->company_id, 403);
+        }
+
+        $companies = Auth::user()->role === 'admin'
+            ? Company::orderBy('name')->get()
+            : collect();
+
+        return view('admin.jobs.edit', compact('jobListing', 'companies'));
+    }
+
+    public function updateJob(Request $request, JobListing $jobListing)
+    {
+        $this->ensureStaff();
+
+        if (Auth::user()->role !== 'admin') {
+            abort_unless(optional(Auth::user()->company)->id === $jobListing->company_id, 403);
+        }
+
+        $rules = [
+            'title' => ['required', 'string', 'max:255'],
+            'description' => ['required', 'string'],
+            'requirements' => ['required', 'string'],
+            'location' => ['required', 'string', 'max:255'],
+            'salary' => ['nullable', 'string', 'max:255'],
+            'status' => ['required', 'in:open,closed,pending'],
+        ];
+
+        if (Auth::user()->role === 'admin') {
+            $rules['company_id'] = ['required', 'exists:companies,id'];
+        }
+
+        $data = $request->validate($rules);
+
+        $updateData = [
+            'title' => $data['title'],
+            'description' => $data['description'],
+            'requirements' => $data['requirements'],
+            'location' => $data['location'],
+            'salary' => $data['salary'] ?? null,
+            'status' => $data['status'],
+        ];
+
+        if (Auth::user()->role === 'admin') {
+            $updateData['company_id'] = $data['company_id'];
+        }
+
+        $jobListing->update($updateData);
+
+        return redirect()
+            ->route('dashboard')
+            ->with('status', 'Lowongan kerja berhasil diperbarui.');
+    }
+
+    public function destroyJob(JobListing $jobListing)
+    {
+        $this->ensureStaff();
+
+        if (Auth::user()->role !== 'admin') {
+            abort_unless(optional(Auth::user()->company)->id === $jobListing->company_id, 403);
+        }
+
+        $jobListing->delete();
+
+        return redirect()
+            ->route('dashboard')
+            ->with('status', 'Lowongan kerja berhasil dihapus.');
     }
 
     public function closeJob(JobListing $jobListing)

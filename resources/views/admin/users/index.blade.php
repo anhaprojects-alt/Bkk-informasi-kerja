@@ -97,9 +97,10 @@
                                         <td class="p-4 text-center">
                                             <span class="text-[10px] text-slate-400 font-black uppercase">App: {{ $user->applications_count }}</span>
                                         </td>
-                                        <td class="p-4 text-center">
+                                        <td class="p-4 text-center space-x-2">
                                             @if($user->id !== Auth::id())
-                                                <form method="POST" action="{{ route('admin.users.destroy', $user) }}" onsubmit="return confirm('Hapus user ini selamanya?')">
+                                                <a href="{{ route('admin.users.edit', $user) }}" class="text-blue-600 hover:text-blue-800 uppercase text-[9px] font-black tracking-widest">Edit</a>
+                                                <form method="POST" action="{{ route('admin.users.destroy', $user) }}" class="inline-block" onsubmit="return confirm('Hapus user ini selamanya?')">
                                                     @csrf @method('DELETE')
                                                     <button class="text-red-500 hover:text-red-700 uppercase text-[9px] font-black tracking-widest">Delete</button>
                                                 </form>
