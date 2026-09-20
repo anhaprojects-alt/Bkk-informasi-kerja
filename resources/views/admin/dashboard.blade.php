@@ -266,6 +266,31 @@
                             </table>
                         </div>
                     </div>
+
+                    <div class="glass-card overflow-hidden border-b-4 border-indigo-600">
+                        <div class="p-5 border-b border-slate-100 bg-slate-50/50">
+                            <h4 class="font-black text-slate-800 text-sm tracking-tight uppercase">Lokasi Perusahaan</h4>
+                            <p class="text-[10px] text-slate-400 font-medium mt-1">{{ $company?->address ?? 'Lengkapi alamat perusahaan di Pengaturan Profil.' }}</p>
+                        </div>
+                        <div class="h-80 bg-slate-100">
+                            @if ($company?->address)
+                                <iframe
+                                    class="w-full h-full"
+                                    frameborder="0"
+                                    scrolling="no"
+                                    loading="lazy"
+                                    src="https://maps.google.com/maps?q={{ urlencode($company->address) }}&t=&z=15&ie=UTF8&iwloc=&output=embed"
+                                    title="Lokasi {{ $company->name }}">
+                                </iframe>
+                            @else
+                                <div class="h-full flex flex-col items-center justify-center text-center p-6 text-slate-400">
+                                    <svg class="h-10 w-10 mb-3 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><circle cx="12" cy="11" r="3" stroke-width="1.5" /></svg>
+                                    <p class="text-xs font-bold">Alamat perusahaan belum diatur.</p>
+                                    <a href="{{ route('settings.profile') }}" class="mt-3 text-[10px] font-black uppercase tracking-widest text-blue-600 hover:underline">Atur Sekarang</a>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
                 @endif
             </main>
         </div>

@@ -89,6 +89,57 @@
                         </div>
                     </div>
 
+                    @if ($user->role === 'company')
+                        <div class="space-y-5 border border-blue-100 rounded-2xl p-6 bg-blue-50/40" x-data="{ mapAddress: @js(old('company_address', $user->company?->address ?? '')) }">
+                            <div>
+                                <p class="text-xs font-black text-slate-900 uppercase tracking-widest">Profil Perusahaan & Lokasi</p>
+                                <p class="text-[11px] text-slate-500 mt-1">Alamat ini digunakan untuk menampilkan lokasi perusahaan pada peta lowongan.</p>
+                            </div>
+
+                            <div class="space-y-1">
+                                <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400">Nama Perusahaan</label>
+                                <input type="text" name="company_name" value="{{ old('company_name', $user->company?->name ?? $user->name) }}" required
+                                    class="block w-full px-4 py-3 bg-white border-2 border-slate-200 rounded-xl text-sm font-bold focus:outline-none focus:border-blue-600 transition">
+                                @error('company_name') <p class="text-[10px] font-bold text-red-600 mt-1">{{ $message }}</p> @enderror
+                            </div>
+
+                            <div class="space-y-1">
+                                <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400">Alamat Lengkap Perusahaan</label>
+                                <textarea name="company_address" rows="3" required x-model="mapAddress"
+                                    placeholder="Contoh: Jl. Jenderal Sudirman No.  kav. 52-53, Senayan, Jakarta Selatan, DKI Jakarta"
+                                    class="block w-full px-4 py-3 bg-white border-2 border-slate-200 rounded-xl text-sm font-bold focus:outline-none focus:border-blue-600 transition"></textarea>
+                                <p class="text-[10px] text-slate-500">Gunakan alamat lengkap beserta kota dan provinsi agar titik peta lebih akurat.</p>
+                                @error('company_address') <p class="text-[10px] font-bold text-red-600 mt-1">{{ $message }}</p> @enderror
+                            </div>
+
+                            <div class="rounded-xl overflow-hidden border-2 border-white shadow-md bg-slate-200 h-64">
+                                <iframe
+                                    class="w-full h-full"
+                                    frameborder="0"
+                                    scrolling="no"
+                                    loading="lazy"
+                                    :src="'https://maps.google.com/maps?q=' + encodeURIComponent(mapAddress || 'Indonesia') + '&t=&z=15&ie=UTF8&iwloc=&output=embed'"
+                                    title="Pratinjau lokasi perusahaan">
+                                </iframe>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div class="space-y-1">
+                                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400">Deskripsi Perusahaan</label>
+                                    <textarea name="company_description" rows="3"
+                                        class="block w-full px-4 py-3 bg-white border-2 border-slate-200 rounded-xl text-sm font-bold focus:outline-none focus:border-blue-600 transition">{{ old('company_description', $user->company?->description ?? '') }}</textarea>
+                                    @error('company_description') <p class="text-[10px] font-bold text-red-600 mt-1">{{ $message }}</p> @enderror
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400">Website Perusahaan</label>
+                                    <input type="url" name="company_website" value="{{ old('company_website', $user->company?->website ?? '') }}" placeholder="https://perusahaan.com"
+                                        class="block w-full px-4 py-3 bg-white border-2 border-slate-200 rounded-xl text-sm font-bold focus:outline-none focus:border-blue-600 transition">
+                                    @error('company_website') <p class="text-[10px] font-bold text-red-600 mt-1">{{ $message }}</p> @enderror
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="space-y-1">
                             <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400">Email</label>

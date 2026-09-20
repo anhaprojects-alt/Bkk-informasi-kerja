@@ -68,4 +68,37 @@ class ProfileAndMessagingTest extends TestCase
             'body' => 'Halo, saya ingin bertanya terkait proses seleksi.',
         ]);
     }
+
+    public function test_company_can_update_company_address_used_by_maps(): void
+    {
+        $companyUser = User::factory()->create([
+            'role' => 'company',
+            'phone_number' => '081234567894',
+        ]);
+
+        $this->actingAs($companyUser)
+            ->put('/settings/profile', [
+                'name' => $companyUser->name,
+                'email' => $companyUser->email,
+                'phone_number' => $companyUser->phone_number,
+                'company_name' => 'PT Lokasi Tepat',
+                'company_address' => 'Jl. Jenderal Sudirman No. 52, Senayan, Jakarta Selatan, DKI Jakarta',
+                'company_description' => 'Perusahaan teknologi.',
+                'company_website' => 'https://lokasitepat.test',
+            ])
+            ->assertRedirect('/settings/profile');
+
+        $this->assertDatabaseHas('companies', [
+            'user_id' => $companyUser->id,
+            'name' => 'PT Lokasi Tepat',
+            'address' => 'Jl. Jenderal Sudirman No. 52, Senayan, Jakarta Selatan, DKI Jakarta',
+            'website' => 'https://lokasitepat.test',
+        ]);
+
+        $this->actingAs($companyUser)
+            ->get('/admin/dashboard')
+            ->assertOk()
+            ->assertSee('Jl. Jenderal Sudirman No. 52, Senayan, Jakarta Selatan, DKI Jakarta')
+            ->assertSee('maps.google.com/maps?q=Jl.+Jenderal+Sudirman+No.+52%2C+Senayan%2C+Jakarta+Selatan%2C+DKI+Jakarta', false);
+    }
 }

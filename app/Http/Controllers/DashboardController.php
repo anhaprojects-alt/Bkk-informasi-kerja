@@ -81,6 +81,7 @@ class DashboardController extends Controller
         return view('admin.dashboard', [
             'stats' => $stats,
             'jobs' => $jobs,
+            'company' => $user->company,
             'recentUsers' => collect(), // Empty collection for consistency
             'recentJobs' => collect(), // Empty collection for consistency
         ]);
@@ -145,7 +146,7 @@ class DashboardController extends Controller
      */
     public function profile()
     {
-        $user = Auth::user();
+        $user = Auth::user()->load('company');
 
         return view('settings.profile', compact('user'));
     }
@@ -163,6 +164,10 @@ class DashboardController extends Controller
             'location' => ['nullable', 'string', 'max:255'],
             'province' => ['nullable', 'string', 'max:100'],
             'city' => ['nullable', 'string', 'max:100'],
+            'company_name' => ['nullable', 'string', 'max:255'],
+            'company_description' => ['nullable', 'string', 'max:5000'],
+            'company_address' => ['nullable', 'string', 'max:500'],
+            'company_website' => ['nullable', 'url:http,https', 'max:255'],
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
             'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
             'banner' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
@@ -177,6 +182,18 @@ class DashboardController extends Controller
         $user->location = $data['location'] ?? null;
         $user->province = $data['province'] ?? null;
         $user->city = $data['city'] ?? null;
+
+        if ($user->role === 'company') {
+            $user->company()->updateOrCreate(
+                [],
+                [
+                    'name' => $data['company_name'] ?? $user->name,
+                    'description' => $data['company_description'] ?? null,
+                    'address' => $data['company_address'] ?? null,
+                    'website' => $data['company_website'] ?? null,
+                ],
+            );
+        }
 
         if ($request->hasFile('avatar')) {
             if ($user->avatar_path && Storage::disk('public')->exists($user->avatar_path)) {
