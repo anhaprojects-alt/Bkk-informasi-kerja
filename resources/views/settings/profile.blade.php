@@ -37,6 +37,8 @@
                         <div>
                             <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Foto Profil</p>
                             <input type="file" name="avatar" accept="image/*" class="mt-2 block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-blue-50 file:text-blue-700 file:font-black">
+                            <p class="mt-2 text-[10px] font-medium leading-relaxed text-slate-500">Catatan: gunakan JPG, JPEG, PNG, atau WEBP dengan ukuran maksimal 8 MB.</p>
+                            @error('avatar') <p class="text-[10px] font-bold text-red-600 mt-1">{{ $message }}</p> @enderror
                         </div>
                     </div>
 
@@ -46,6 +48,8 @@
                             <img src="{{ $user->banner_url }}" alt="Banner" class="h-32 w-full object-cover">
                         </div>
                         <input type="file" name="banner" accept="image/*" class="mt-2 block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-slate-100 file:text-slate-700 file:font-black">
+                        <p class="text-[10px] font-medium leading-relaxed text-slate-500">Catatan: gunakan JPG, JPEG, PNG, atau WEBP dengan ukuran maksimal 8 MB.</p>
+                        @error('banner') <p class="text-[10px] font-bold text-red-600 mt-1">{{ $message }}</p> @enderror
                     </div>
 
                     <div class="space-y-1">
@@ -163,7 +167,8 @@
                             @endif
                         </div>
 
-                        <input type="file" name="cv" accept=".pdf" class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-indigo-50 file:text-indigo-700 file:font-black">
+                        <input type="file" name="cv" accept=".pdf,.doc,.docx" class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-indigo-50 file:text-indigo-700 file:font-black">
+                        <p class="text-[10px] font-medium leading-relaxed text-slate-500">Catatan: CV harus berformat PDF, DOC, atau DOCX dengan ukuran maksimal 5 MB.</p>
 
                         @if ($user->cv_path)
                             <div class="mt-4 space-y-3">

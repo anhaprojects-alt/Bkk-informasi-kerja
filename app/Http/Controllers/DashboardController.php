@@ -169,9 +169,19 @@ class DashboardController extends Controller
             'company_address' => ['nullable', 'string', 'max:500'],
             'company_website' => ['nullable', 'url:http,https', 'max:255'],
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
-            'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
-            'banner' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
+            'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:8192'],
+            'banner' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:8192'],
             'cv' => ['nullable', 'file', 'mimes:pdf,doc,docx', 'max:5120'],
+        ], [
+            'avatar.image' => 'Foto profil harus berupa file gambar yang valid.',
+            'avatar.mimes' => 'Foto profil hanya boleh berformat JPG, JPEG, PNG, atau WEBP.',
+            'avatar.max' => 'Foto profil maksimal berukuran 8 MB.',
+            'banner.image' => 'Banner harus berupa file gambar yang valid.',
+            'banner.mimes' => 'Banner hanya boleh berformat JPG, JPEG, PNG, atau WEBP.',
+            'banner.max' => 'Banner maksimal berukuran 8 MB.',
+            'cv.file' => 'CV harus berupa file yang valid.',
+            'cv.mimes' => 'CV hanya boleh berformat PDF, DOC, atau DOCX.',
+            'cv.max' => 'CV maksimal berukuran 5 MB.',
         ]);
 
         $user->name = $data['name'];
@@ -200,7 +210,7 @@ class DashboardController extends Controller
                 Storage::disk('public')->delete($user->avatar_path);
             }
 
-            $user->avatar_path = $request->file('avatar')->store('profiles/avatars', 'public');
+            $user->avatar_path = $request->file('avatar')->storePublicly('profiles/avatars', 'public');
         }
 
         if ($request->hasFile('banner')) {
@@ -208,7 +218,7 @@ class DashboardController extends Controller
                 Storage::disk('public')->delete($user->banner_path);
             }
 
-            $user->banner_path = $request->file('banner')->store('profiles/banners', 'public');
+            $user->banner_path = $request->file('banner')->storePublicly('profiles/banners', 'public');
         }
 
         if ($request->hasFile('cv')) {

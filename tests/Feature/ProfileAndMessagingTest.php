@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class ProfileAndMessagingTest extends TestCase
@@ -100,5 +102,31 @@ class ProfileAndMessagingTest extends TestCase
             ->assertOk()
             ->assertSee('Jl. Jenderal Sudirman No. 52, Senayan, Jakarta Selatan, DKI Jakarta')
             ->assertSee('maps.google.com/maps?q=Jl.+Jenderal+Sudirman+No.+52%2C+Senayan%2C+Jakarta+Selatan%2C+DKI+Jakarta', false);
+    }
+
+    public function test_user_can_upload_avatar_and_banner(): void
+    {
+        Storage::fake('public');
+
+        $user = User::factory()->create([
+            'phone_number' => '081234567895',
+        ]);
+
+        $this->actingAs($user)
+            ->put('/settings/profile', [
+                'name' => $user->name,
+                'email' => $user->email,
+                'phone_number' => $user->phone_number,
+                'avatar' => UploadedFile::fake()->image('avatar.jpg', 400, 400),
+                'banner' => UploadedFile::fake()->image('banner.jpg', 1600, 500),
+            ])
+            ->assertRedirect('/settings/profile');
+
+        $user->refresh();
+
+        $this->assertNotEmpty($user->avatar_path);
+        $this->assertNotEmpty($user->banner_path);
+        Storage::disk('public')->assertExists($user->avatar_path);
+        Storage::disk('public')->assertExists($user->banner_path);
     }
 }

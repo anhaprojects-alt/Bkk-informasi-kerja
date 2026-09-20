@@ -22,6 +22,7 @@ RUN apk add --no-cache \
     git
 
 RUN docker-php-ext-install pdo pdo_mysql pdo_pgsql bcmath gd
+RUN printf "upload_max_filesize=8M\npost_max_size=20M\n" > /usr/local/etc/php/conf.d/uploads.ini
 
 WORKDIR /var/www/html
 
