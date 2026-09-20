@@ -109,6 +109,7 @@ class ProfileAndMessagingTest extends TestCase
         Storage::fake('public');
 
         $user = User::factory()->create([
+            'role' => 'applicant',
             'phone_number' => '081234567895',
         ]);
 
@@ -128,5 +129,33 @@ class ProfileAndMessagingTest extends TestCase
         $this->assertNotEmpty($user->banner_path);
         Storage::disk('public')->assertExists($user->avatar_path);
         Storage::disk('public')->assertExists($user->banner_path);
+    }
+
+    public function test_company_profile_does_not_accept_cv_uploads(): void
+    {
+        Storage::fake('public');
+
+        $companyUser = User::factory()->create([
+            'role' => 'company',
+            'phone_number' => '081234567896',
+        ]);
+
+        $this->actingAs($companyUser)
+            ->put('/settings/profile', [
+                'name' => $companyUser->name,
+                'email' => $companyUser->email,
+                'phone_number' => $companyUser->phone_number,
+                'cv' => UploadedFile::fake()->create('company-cv.pdf', 100, 'application/pdf'),
+            ])
+            ->assertRedirect('/settings/profile');
+
+        $companyUser->refresh();
+
+        $this->assertNull($companyUser->cv_path);
+        $this->assertNull($companyUser->cv_name);
+        $this->assertDatabaseMissing('users', [
+            'id' => $companyUser->id,
+            'cv_path' => 'profiles/cv/company-cv.pdf',
+        ]);
     }
 }

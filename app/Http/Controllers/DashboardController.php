@@ -155,7 +155,7 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
 
-        $data = $request->validate([
+        $rules = [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,'.$user->id],
             'phone_number' => ['required', 'string', 'max:20', 'unique:users,phone_number,'.$user->id],
@@ -171,18 +171,27 @@ class DashboardController extends Controller
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
             'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:8192'],
             'banner' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:8192'],
-            'cv' => ['nullable', 'file', 'mimes:pdf,doc,docx', 'max:5120'],
-        ], [
+        ];
+
+        $messages = [
             'avatar.image' => 'Foto profil harus berupa file gambar yang valid.',
             'avatar.mimes' => 'Foto profil hanya boleh berformat JPG, JPEG, PNG, atau WEBP.',
             'avatar.max' => 'Foto profil maksimal berukuran 8 MB.',
             'banner.image' => 'Banner harus berupa file gambar yang valid.',
             'banner.mimes' => 'Banner hanya boleh berformat JPG, JPEG, PNG, atau WEBP.',
             'banner.max' => 'Banner maksimal berukuran 8 MB.',
-            'cv.file' => 'CV harus berupa file yang valid.',
-            'cv.mimes' => 'CV hanya boleh berformat PDF, DOC, atau DOCX.',
-            'cv.max' => 'CV maksimal berukuran 5 MB.',
-        ]);
+        ];
+
+        if ($user->role === 'applicant') {
+            $rules['cv'] = ['nullable', 'file', 'mimes:pdf,doc,docx', 'max:5120'];
+            $messages += [
+                'cv.file' => 'CV harus berupa file yang valid.',
+                'cv.mimes' => 'CV hanya boleh berformat PDF, DOC, atau DOCX.',
+                'cv.max' => 'CV maksimal berukuran 5 MB.',
+            ];
+        }
+
+        $data = $request->validate($rules, $messages);
 
         $user->name = $data['name'];
         $user->email = $data['email'];
@@ -221,7 +230,7 @@ class DashboardController extends Controller
             $user->banner_path = $request->file('banner')->storePublicly('profiles/banners', 'public');
         }
 
-        if ($request->hasFile('cv')) {
+        if ($user->role === 'applicant' && $request->hasFile('cv')) {
             if ($user->cv_path && Storage::disk('public')->exists($user->cv_path)) {
                 Storage::disk('public')->delete($user->cv_path);
             }

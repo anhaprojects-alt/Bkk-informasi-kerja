@@ -24,7 +24,6 @@
                 <div class="mb-6 p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-bold rounded-2xl shadow-sm">
                     {{ session('status') }}
                 </div>
-            @endif
 
             <div class="glass-card p-8 bg-white">
                 <form method="POST" action="{{ route('settings.profile.update') }}" enctype="multipart/form-data" class="space-y-6" x-data="{ busy: false }" @submit="busy = true">
@@ -142,7 +141,6 @@
                                 </div>
                             </div>
                         </div>
-                    @endif
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="space-y-1">
@@ -159,13 +157,14 @@
                         </div>
                     </div>
 
-                    <div class="space-y-4 border border-dashed border-slate-200 rounded-2xl p-6 bg-slate-50/40">
+                    @if ($user->role === 'applicant')
+                        <div class="space-y-4 border border-dashed border-slate-200 rounded-2xl p-6 bg-slate-50/40">
                         <div class="flex items-center justify-between">
                             <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400">Curriculum Vitae (CV)</label>
                             @if ($user->cv_path)
                                 <span class="text-[10px] font-black uppercase text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">Sudah Terunggah</span>
                             @endif
-                        </div>
+                            </div>
 
                         <input type="file" name="cv" accept=".pdf,.doc,.docx" class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-indigo-50 file:text-indigo-700 file:font-black">
                         <p class="text-[10px] font-medium leading-relaxed text-slate-500">Catatan: CV harus berformat PDF, DOC, atau DOCX dengan ukuran maksimal 5 MB.</p>
@@ -192,7 +191,8 @@
                             <p class="text-[10px] text-slate-400 font-medium italic">Unggah file PDF CV Anda untuk memudahkan HRD dalam meninjau profil Anda.</p>
                         @endif
                         @error('cv') <p class="text-[10px] font-bold text-red-600 mt-1">{{ $message }}</p> @enderror
-                    </div>
+                        </div>
+                    @endif
 
                     <div class="pt-6 border-t border-slate-100 space-y-6">
                         <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Ubah Kata Sandi (Kosongkan jika tidak ingin mengubah)</p>
