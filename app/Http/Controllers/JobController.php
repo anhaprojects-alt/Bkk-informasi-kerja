@@ -61,12 +61,12 @@ class JobController extends Controller
     {
         $search = trim((string) $request->query('q', ''));
         $location = trim((string) $request->query('l', ''));
-        $provinces = $request->query('provinces', []);
-        $cities = $request->query('cities', []);
+        $provinces = (array) $request->query('provinces', []);
+        $cities = (array) $request->query('cities', []);
         $remoteOnly = $request->boolean('remote');
 
         $query = JobListing::query()
-            ->with(['company' => function($q) {
+            ->with(['company' => function ($q) {
                 $q->select('id', 'user_id', 'name', 'logo', 'address');
             }])
             ->where('status', 'open');
@@ -95,11 +95,11 @@ class JobController extends Controller
         }
 
         // Checklist filters for Indonesian Regions
-        if (!empty($provinces)) {
+        if (! empty($provinces)) {
             $query->whereIn('location', $provinces);
         }
 
-        if (!empty($cities)) {
+        if (! empty($cities)) {
             $query->whereIn('location', $cities);
         }
 
@@ -116,7 +116,13 @@ class JobController extends Controller
         $appliedJobIds = Auth::check() ? Applicant::where('user_id', Auth::id())->pluck('job_listing_id')->all() : [];
 
         // Meta data for filters
-        $availableLocations = JobListing::where('status', 'open')->select('location')->distinct()->pluck('location')->all();
+        $availableLocations = JobListing::where('status', 'open')
+            ->whereNotNull('location')
+            ->select('location')
+            ->distinct()
+            ->pluck('location')
+            ->filter()
+            ->all();
 
         return view('jobs.explore', compact('jobs', 'search', 'location', 'provinces', 'cities', 'remoteOnly', 'appliedJobIds', 'availableLocations'));
     }

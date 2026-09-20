@@ -243,10 +243,10 @@
                                 <!-- Job Header Info -->
                                 <div class="space-y-6">
                                     <div class="w-24 h-24 bg-white border-4 border-white rounded-2xl shadow-xl flex items-center justify-center p-2 relative">
-                                        <template x-if="selectedJob.company && selectedJob.company.logo">
+                                        <template x-if="selectedJob && selectedJob.company && selectedJob.company.logo">
                                             <img :src="'/storage/' + selectedJob.company.logo" class="w-full h-full object-cover rounded-xl">
                                         </template>
-                                        <template x-if="!selectedJob.company || !selectedJob.company.logo">
+                                        <template x-if="!selectedJob || !selectedJob.company || !selectedJob.company.logo">
                                             <svg class="h-10 w-10 text-slate-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
                                         </template>
                                         <div class="absolute -bottom-2 -right-2 bg-blue-600 text-white p-1 rounded-lg shadow-lg">
@@ -255,16 +255,16 @@
                                     </div>
 
                                     <div class="space-y-2">
-                                        <h1 class="text-3xl font-black text-slate-900 tracking-tight leading-none" x-text="selectedJob.title"></h1>
+                                        <h1 class="text-3xl font-black text-slate-900 tracking-tight leading-none" x-text="selectedJob ? selectedJob.title : ''"></h1>
                                         <div class="flex items-center gap-2 text-lg font-bold text-slate-700">
-                                            <span x-text="selectedJob.company ? selectedJob.company.name : 'Mitra Terpercaya'"></span>
+                                            <span x-text="(selectedJob && selectedJob.company) ? selectedJob.company.name : 'Mitra Terpercaya'"></span>
                                             <span class="text-slate-300">•</span>
-                                            <span x-text="selectedJob.location"></span>
+                                            <span x-text="selectedJob ? selectedJob.location : ''"></span>
                                         </div>
                                         <div class="flex flex-wrap items-center gap-3 text-[11px] font-black uppercase text-slate-400 tracking-widest pt-2">
-                                            <span class="bg-slate-100 px-2 py-1 rounded">Diposting <span x-text="new Date(selectedJob.created_at).toLocaleDateString('id-ID', {day:'numeric', month:'long'})"></span></span>
+                                            <span class="bg-slate-100 px-2 py-1 rounded">Diposting <span x-text="selectedJob ? new Date(selectedJob.created_at).toLocaleDateString('id-ID', {day:'numeric', month:'long'}) : ''"></span></span>
                                             <span class="text-emerald-600 bg-emerald-50 px-2 py-1 rounded">28 Applicants</span>
-                                            <template x-if="selectedJob.salary">
+                                            <template x-if="selectedJob && selectedJob.salary">
                                                 <span class="bg-amber-50 text-amber-600 px-2 py-1 rounded border border-amber-100" x-text="selectedJob.salary"></span>
                                             </template>
                                         </div>
@@ -311,14 +311,14 @@
                                             <svg class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /></svg>
                                             Lokasi & Akses
                                         </h2>
-                                        <p class="text-sm text-slate-600 font-bold mb-4" x-text="selectedJob.company ? selectedJob.company.address : selectedJob.location"></p>
+                                        <p class="text-sm text-slate-600 font-bold mb-4" x-text="(selectedJob.company && selectedJob.company.address) ? selectedJob.company.address : selectedJob.location"></p>
 
                                         <!-- Smart Map Embed (OpenStreetMap / Leaflet approach using Iframe for simplicity) -->
                                         <div class="rounded-xl overflow-hidden border-2 border-white shadow-md bg-slate-200 relative h-48 group">
                                             <iframe
                                                 class="w-full h-full grayscale-[50%] contrast-[1.2] group-hover:grayscale-0 transition-all duration-700"
                                                 frameborder="0" scrolling="no" marginheight="0" marginwidth="0"
-                                                :src="'https://maps.google.com/maps?q=' + encodeURIComponent(selectedJob.company ? selectedJob.company.address : selectedJob.location) + '&t=&z=13&ie=UTF8&iwloc=&output=embed'">
+                                                :src="'https://maps.google.com/maps?q=' + encodeURIComponent((selectedJob.company && selectedJob.company.address) ? selectedJob.company.address : selectedJob.location) + '&t=&z=13&ie=UTF8&iwloc=&output=embed'">
                                             </iframe>
                                             <div class="absolute bottom-3 right-3 bg-white/90 backdrop-blur px-3 py-1.5 rounded-lg border border-slate-200 text-[9px] font-black uppercase tracking-widest text-slate-500 shadow-sm pointer-events-none">BKK Maps Insight</div>
                                         </div>
