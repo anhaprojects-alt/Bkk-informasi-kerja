@@ -24,6 +24,7 @@
                 <div class="mb-6 p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-bold rounded-2xl shadow-sm">
                     {{ session('status') }}
                 </div>
+            @endif
 
             <div class="glass-card p-8 bg-white">
                 <form method="POST" action="{{ route('settings.profile.update') }}" enctype="multipart/form-data" class="space-y-6" x-data="{ busy: false }" @submit="busy = true">
@@ -141,6 +142,7 @@
                                 </div>
                             </div>
                         </div>
+                    @endif
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="space-y-1">
