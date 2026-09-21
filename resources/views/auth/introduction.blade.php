@@ -83,9 +83,9 @@
                     <p class="text-sm text-slate-400 font-bold uppercase tracking-widest">&copy; 2026 BKK Informasi Kerja</p>
                 </div>
                 <div class="flex gap-8 text-sm font-bold text-slate-400">
-                    <a href="#" class="hover:text-blue-600">Tentang Kami</a>
-                    <a href="#" class="hover:text-blue-600">Kebijakan Privasi</a>
-                    <a href="#" class="hover:text-blue-600">Pusat Bantuan</a>
+                    <a href="{{ route('about') }}" class="hover:text-blue-600 transition-colors">Tentang Kami</a>
+                    <a href="{{ route('privacy') }}" class="hover:text-blue-600 transition-colors">Kebijakan Privasi</a>
+                    <a href="{{ route('help.center') }}" class="hover:text-blue-600 transition-colors">Pusat Bantuan</a>
                 </div>
             </div>
         </footer>

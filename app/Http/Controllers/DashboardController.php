@@ -154,8 +154,10 @@ class DashboardController extends Controller
 
     public function profileUpdate(Request $request)
     {
+        /** @var User $user */
         $user = Auth::user();
 
+        // 1. Validation with robust limits
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,'.$user->id],
@@ -170,104 +172,92 @@ class DashboardController extends Controller
             'company_address' => ['nullable', 'string', 'max:500'],
             'company_website' => ['nullable', 'url:http,https', 'max:255'],
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
-            'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:10240'],
-            'banner' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:10240'],
-            'cv' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
+            'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
+            'banner' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
+            'cv' => ['nullable', 'file', 'mimes:pdf', 'max:5120'],
         ]);
 
-        $user->name = $data['name'];
-        $user->email = $data['email'];
-        $user->phone_number = $data['phone_number'];
-        $user->headline = $data['headline'] ?? $user->headline;
-        $user->bio = $data['bio'] ?? $user->bio;
-        $user->location = $data['location'] ?? $user->location;
-        $user->province = $data['province'] ?? $user->province;
-        $user->city = $data['city'] ?? $user->city;
-
-        if (! empty($data['password'])) {
-            $user->password = Hash::make($data['password']);
-        }
-
-        // 2. Handle File Uploads with Smart Rollback & Database Sync
-        $oldAvatarPath = $user->avatar_path;
-        $oldBannerPath = $user->banner_path;
-        $oldCvPath = $user->cv_path;
-
         try {
-            DB::beginTransaction();
+            DB::transaction(function () use ($request, $user, $data) {
+                // Update User Info
+                $user->name = $data['name'];
+                $user->email = $data['email'];
+                $user->phone_number = $data['phone_number'];
+                $user->headline = $data['headline'] ?? $user->headline;
+                $user->bio = $data['bio'] ?? $user->bio;
+                $user->location = $data['location'] ?? $user->location;
+                $user->province = $data['province'] ?? $user->province;
+                $user->city = $data['city'] ?? $user->city;
 
-            if ($request->hasFile('avatar')) {
-                $user->avatar_path = $request->file('avatar')->store('profiles/avatars', 'public');
-            }
+                if (! empty($data['password'])) {
+                    $user->password = Hash::make($data['password']);
+                }
 
-            if ($request->hasFile('banner')) {
-                $user->banner_path = $request->file('banner')->store('profiles/banners', 'public');
-            }
+                // File Handling: Store first, then cleanup old ones
+                if ($request->hasFile('avatar')) {
+                    $oldPath = $user->avatar_path;
+                    $user->avatar_path = $request->file('avatar')->store('avatars', 'public');
+                    if ($oldPath && Storage::disk('public')->exists($oldPath)) {
+                        Storage::disk('public')->delete($oldPath);
+                    }
+                }
 
-            if ($user->role === 'applicant' && $request->hasFile('cv')) {
-                $user->cv_path = $request->file('cv')->store('profiles/cvs', 'public');
-                $user->cv_name = $request->file('cv')->getClientOriginalName();
-            }
+                if ($request->hasFile('banner')) {
+                    $oldPath = $user->banner_path;
+                    $user->banner_path = $request->file('banner')->store('banners', 'public');
+                    if ($oldPath && Storage::disk('public')->exists($oldPath)) {
+                        Storage::disk('public')->delete($oldPath);
+                    }
+                }
 
-            if (! empty($data['password'])) {
-                $user->password = Hash::make($data['password']);
-            }
+                if ($user->role === 'applicant' && $request->hasFile('cv')) {
+                    $oldPath = $user->cv_path;
+                    $user->cv_path = $request->file('cv')->store('cvs', 'public');
+                    $user->cv_name = $request->file('cv')->getClientOriginalName();
+                    if ($oldPath && Storage::disk('public')->exists($oldPath)) {
+                        Storage::disk('public')->delete($oldPath);
+                    }
+                }
 
-            $user->save();
+                $user->save();
 
-            if ($user->role === 'company') {
-                Company::updateOrCreate(
-                    ['user_id' => $user->id],
-                    [
-                        'name' => $data['company_name'] ?? $user->name,
-                        'description' => $data['company_description'] ?? null,
-                        'address' => $data['company_address'] ?? null,
-                        'website' => $data['company_website'] ?? null,
-                        'logo' => $user->avatar_path,
-                    ]
-                );
-            }
+                // Sync Company Data
+                if ($user->role === 'company') {
+                    Company::updateOrCreate(
+                        ['user_id' => $user->id],
+                        [
+                            'name' => $data['company_name'] ?? $user->name,
+                            'description' => $data['company_description'] ?? null,
+                            'address' => $data['company_address'] ?? null,
+                            'website' => $data['company_website'] ?? null,
+                            'logo' => $user->avatar_path,
+                        ]
+                    );
+                }
+            });
 
-            DB::commit();
-
-            // 3. Post-Success Cleanup (Delete old files only after DB is committed)
-            if ($request->hasFile('avatar') && $oldAvatarPath && $oldAvatarPath !== $user->avatar_path) {
-                Storage::disk('public')->delete($oldAvatarPath);
-            }
-            if ($request->hasFile('banner') && $oldBannerPath && $oldBannerPath !== $user->banner_path) {
-                Storage::disk('public')->delete($oldBannerPath);
-            }
-            if ($user->role === 'applicant' && $request->hasFile('cv') && $oldCvPath && $oldCvPath !== $user->cv_path) {
-                Storage::disk('public')->delete($oldCvPath);
-            }
+            return redirect()->route('settings.profile')->with('status', 'Profil Berhasil Diperbarui!');
 
         } catch (\Exception $e) {
-            DB::rollBack();
-
-            // System Intelligence: Delete the new files if DB save failed to prevent orphaned files
-            if ($request->hasFile('avatar')) {
-                Storage::disk('public')->delete($user->avatar_path);
-            }
-            if ($request->hasFile('banner')) {
-                Storage::disk('public')->delete($user->banner_path);
-            }
-            if ($user->role === 'applicant' && $request->hasFile('cv')) {
-                Storage::disk('public')->delete($user->cv_path);
-            }
-
             error_log('Profile Update Error: '.$e->getMessage());
 
-            return back()->withInput()->withErrors([
-                'avatar' => 'Sistem mendeteksi adanya gangguan saat menyimpan data. Perubahan dibatalkan demi keamanan data Anda. Silakan coba lagi.',
-            ]);
+            return back()->withInput()->withErrors(['avatar' => 'Gagal menyimpan profil: '.$e->getMessage()]);
         }
-
-        return redirect()->route('settings.profile')->with('status', 'Profil berhasil diperbarui.');
     }
 
     public function helpCenter()
     {
         return view('help.center');
+    }
+
+    public function aboutUs()
+    {
+        return view('pages.about');
+    }
+
+    public function privacyPolicy()
+    {
+        return view('pages.privacy');
     }
 
     public function messagesIndex(?User $user = null)

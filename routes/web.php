@@ -27,6 +27,11 @@ Route::post('/phone-reset-password', [AuthController::class, 'resetPasswordViaPh
 Route::get('/jobs', [JobController::class, 'index'])->name('jobs.index');
 Route::get('/jobs/{jobListing}', [JobController::class, 'show'])->name('jobs.show');
 
+// Public Pages
+Route::get('/about-us', [DashboardController::class, 'aboutUs'])->name('about');
+Route::get('/privacy-policy', [DashboardController::class, 'privacyPolicy'])->name('privacy');
+Route::get('/help-center', [DashboardController::class, 'helpCenter'])->name('help.center');
+
 Route::middleware('auth')->group(function () {
     // Applicant Smart Dashboard
     Route::get('/applicant/dashboard', [JobController::class, 'dashboard'])->name('applicant.dashboard');
@@ -57,7 +62,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/settings/profile', [DashboardController::class, 'profile'])->name('settings.profile');
     Route::put('/settings/profile', [DashboardController::class, 'profileUpdate'])->name('settings.profile.update');
 
-    Route::get('/help-center', [DashboardController::class, 'helpCenter'])->name('help.center');
     Route::get('/messages', [DashboardController::class, 'messagesIndex'])->name('messages.index');
     Route::get('/messages/{user}', [DashboardController::class, 'messagesIndex'])->name('messages.show');
     Route::post('/messages/{user}', [DashboardController::class, 'messagesStore'])->name('messages.store');
